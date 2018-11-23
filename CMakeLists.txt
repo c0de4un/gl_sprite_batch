@@ -31,6 +31,9 @@ set ( ROOT_PROJECT_VERSION 1.0.0 )
 # Configure Project
 project ( ${ROOT_PROJECT_NAME} VERSION ${ROOT_PROJECT_VERSION} LANGUAGES C CXX )
 
+# Debug-Log for Compiler Configuration
+set (CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/CompilerOptions.cmake")
+
 # =================================================================================
 # CONFIG
 # =================================================================================
@@ -89,6 +92,22 @@ else ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
 	set ( BUILD_TYPE_DIR "release" )
 	
 endif ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
+
+# Compiler
+if ( MSVC ) # MSVC
+	# W3 - Display more warning
+	# std=c++17 - C++ version
+	set ( CMAKE_CXX_FLAGS "/W3 /std:c++17 /Zc:__cplusplus" )
+elseif ( UNIX OR CMAKE_COMPILER_IS_GNUCXX ) # Clang || gcc (Linux, Mac OS or Win32 with MingW)
+
+	# Flags
+	set ( CMAKE_CXX_FLAGS "-Wall -std=c++17" )
+
+	# Apple
+	if ( APPLE ) # Clang / Mac OS only
+		set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++ -mmacosx-version-min=10.7" )
+	endif ( APPLE ) # Clang / Mac OS only
+endif ( MSVC ) # MSVC
 
 # =================================================================================
 # CONSTANTS
@@ -327,14 +346,35 @@ endif ( WIN32 )
 # =================================================================================
 
 # Sample-Project Headers
-set ( ROOT_PROJECT_HEADERS "" )
+set ( ROOT_PROJECT_HEADERS
+"${SOURCES_DIR}/cfg/platform.hpp"
+"${SOURCES_DIR}/cfg/mutex.hpp"
+"${SOURCES_DIR}/cfg/map.hpp"
+"${SOURCES_DIR}/cfg/vector.hpp"
+"${SOURCES_DIR}/cfg/opengl.hpp"
+"${SOURCES_DIR}/cfg/glm.hpp"
+"${SOURCES_DIR}/components/Components.hpp"
+"${SOURCES_DIR}/components/Position.hpp"
+"${SOURCES_DIR}/components/Rotation.hpp"
+"${SOURCES_DIR}/components/Scale.hpp"
+"${SOURCES_DIR}/utils/log/Log.hpp"
+"${SOURCES_DIR}/objects/GameObject.hpp"
+"${SOURCES_DIR}/objects/sprite/Sprite.hpp"
+"${SOURCES_DIR}/physics/Body.hpp"
+"${SOURCES_DIR}/renderer/batch/Drawable.hpp"
+"${SOURCES_DIR}/renderer/GLRenderer.hpp" )
 
 # =================================================================================
 # SOURCES
 # =================================================================================
 
 # Sample-Project Sources
-set ( ROOT_PROJECT_SOURCES "${SOURCES_DIR}/main.cpp" )
+set ( ROOT_PROJECT_SOURCES
+"${SOURCES_DIR}/utils/log/Log.cpp"
+"${SOURCES_DIR}/objects/GameObject.cpp"
+"${SOURCES_DIR}/objects/sprite/Sprite.cpp"
+"${SOURCES_DIR}/renderer/GLRenderer.cpp"
+"${SOURCES_DIR}/main.cpp" )
 
 # =================================================================================
 # EXECUTABLE RESOURCES
@@ -359,11 +399,16 @@ if ( WIN32 ) # WINDOWS
 	# Configure Executable Object
 	set_target_properties ( gl_sprite_batch PROPERTIES
 	CXX_STANDARD 17
-	CXX_STANDARD_REQUIRED YES
-	CXX_EXTENSIONS NO
+	CXX_STANDARD_REQUIRED TRUE
+	CXX_EXTENSIONS FALSE
 	OUTPUT_NAME "${ROOT_PROJECT_NAME}_v${ROOT_PROJECT_VERSION}"
 	RUNTIME_OUTPUT_DIRECTORY ${ROOT_PROJECT_OUTPUT_DIR} )
 	
+	# 
+	#set_property ( TARGET gl_sprite_batch PROPERTY CXX_STANDARD 17 )
+	#set_property ( TARGET gl_sprite_batch PROPERTY CXX_STANDARD_REQUIRED ON )
+	# CXX_STANDARD_REQUIRED
+
 	# Remove Console Window for Release
 	if ( CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
 		set_target_properties( gl_sprite PROPERTIES 
@@ -374,7 +419,7 @@ if ( WIN32 ) # WINDOWS
 	target_link_libraries ( gl_sprite_batch ${opengl} glew glfw3 zlib libPNG )
 
 	# Request features
-	target_compile_features ( gl_sprite_batch PUBLIC cxx_std_17 )
+	target_compile_features ( gl_sprite_batch PRIVATE cxx_std_17 )
 else ( WIN32 )
 	message ( FATAL_ERROR "${ROOT_PROJECT_NAME} - executable object configuration required !" )
 endif ( WIN32 ) # WINDOWS
