@@ -41,7 +41,7 @@ namespace c0de4un
 	 * @param shaderProgram_ - Shader Program.
 	 * @param texture2D_ - 2D Texture.
 	*/
-	Sprite::Sprite( const std::string & pName, GLShaderProgram & shaderprogram_, GLTexture2D & texture2D_ )
+	Sprite::Sprite( const std::string & pName, GLShaderProgram & shaderprogram_, GLTexture2D *const texture2D_ )
 		: GameObject( pName ),
 		mShaderProgram( shaderprogram_ ),
 		mGLTexture2D( texture2D_ ),
@@ -110,8 +110,51 @@ namespace c0de4un
 		logMsg += "::Show";
 		Log::printDebug( logMsg.c_str( ) );
 
+		// Load Shader Program
+		if ( !mShaderProgram.Load( ) )
+		{
+
+			// Log
+			logMsg = "Sprite#";
+			logMsg += mName;
+			logMsg += "::Show - failed to load shader program#";
+			logMsg += mShaderProgram.getName( );
+			Log::printDebug( logMsg.c_str( ) );
+
+			// Cancel
+			return( false );
+
+		}
+
+		// Load 2D-Texture
+		if ( !mGLTexture2D.Load( ) )
+		{
+
+			// Log
+			logMsg = "Sprite#";
+			logMsg += mName;
+			logMsg += "::Show - failed to load shader program#";
+			logMsg += mShaderProgram.getName( );
+			Log::printDebug( logMsg.c_str( ) );
+
+			// Cancel
+			return( false );
+
+		}
+
 		// Set Drawable Position
 		mDrawable.position_ = &mPosition;
+
+		// Set Drawable Rotation
+		mDrawable.rotation_ = &mRotation;
+
+		// Set Drawable Scale
+		mDrawable.scale_ = &mScale;
+
+		// 
+
+		// Set Visible flag
+		mVisible = true;
 
 		// Unlock
 		mLock.unlock( );

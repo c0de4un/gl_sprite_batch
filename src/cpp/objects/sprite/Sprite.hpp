@@ -82,7 +82,7 @@ namespace c0de4un
 		GLShaderProgram & mShaderProgram;
 
 		/* GLTexture */
-		GLTexture2D & mGLTexture2D;
+		GLTexture2D *const mGLTexture2D;
 
 		/* Drawable */
 		Drawable mDrawable;
@@ -142,7 +142,7 @@ namespace c0de4un
 		 * @param shaderProgram_ - Shader Program.
 		 * @param texture2D_ - 2D Texture.
 		*/
-		explicit Sprite( const std::string & pName, GLShaderProgram & shaderprogram_, GLTexture2D & texture2D_ );
+		explicit Sprite( const std::string & pName, GLShaderProgram & shaderprogram_, GLTexture2D *const texture2D_ );
 
 		/* Sprite destructor */
 		virtual ~Sprite( );
