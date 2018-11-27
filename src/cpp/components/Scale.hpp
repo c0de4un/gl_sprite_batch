@@ -36,7 +36,7 @@ namespace c0de4un
 		bool changed_;
 
 		/* Scale vector */
-		glm::vec4 vec4_;
+		glm::vec3 vec3_;
 
 		/* Shared (between systems) Thread-Lock */
 		std::unique_lock<std::mutex> * lock_;

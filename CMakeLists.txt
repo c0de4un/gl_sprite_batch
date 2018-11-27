@@ -353,15 +353,23 @@ set ( ROOT_PROJECT_HEADERS
 "${SOURCES_DIR}/cfg/vector.hpp"
 "${SOURCES_DIR}/cfg/opengl.hpp"
 "${SOURCES_DIR}/cfg/glm.hpp"
+"${SOURCES_DIR}/cfg/string.hpp"
 "${SOURCES_DIR}/components/Components.hpp"
 "${SOURCES_DIR}/components/Position.hpp"
 "${SOURCES_DIR}/components/Rotation.hpp"
 "${SOURCES_DIR}/components/Scale.hpp"
+"${SOURCES_DIR}/camera/ViewProjection.hpp"
+"${SOURCES_DIR}/camera/GLCamera.hpp"
+"${SOURCES_DIR}/assets/texture/GLTexture2D.hpp"
+"${SOURCES_DIR}/assets/shader/GLShader.hpp"
+"${SOURCES_DIR}/assets/shader/GLShaderProgram.hpp"
 "${SOURCES_DIR}/utils/log/Log.hpp"
 "${SOURCES_DIR}/objects/GameObject.hpp"
 "${SOURCES_DIR}/objects/sprite/Sprite.hpp"
 "${SOURCES_DIR}/physics/Body.hpp"
 "${SOURCES_DIR}/renderer/batch/Drawable.hpp"
+"${SOURCES_DIR}/renderer/batch/BatchInfo.hpp"
+"${SOURCES_DIR}/renderer/batch/BatchRequest.hpp"
 "${SOURCES_DIR}/renderer/GLRenderer.hpp" )
 
 # =================================================================================
@@ -370,8 +378,12 @@ set ( ROOT_PROJECT_HEADERS
 
 # Sample-Project Sources
 set ( ROOT_PROJECT_SOURCES
+"${SOURCES_DIR}/camera/GLCamera.cpp"
 "${SOURCES_DIR}/utils/log/Log.cpp"
 "${SOURCES_DIR}/objects/GameObject.cpp"
+"${SOURCES_DIR}/assets/texture/GLTexture2D.cpp"
+"${SOURCES_DIR}/assets/shader/GLShader.cpp"
+"${SOURCES_DIR}/assets/shader/GLShaderProgram.cpp"
 "${SOURCES_DIR}/objects/sprite/Sprite.cpp"
 "${SOURCES_DIR}/renderer/GLRenderer.cpp"
 "${SOURCES_DIR}/main.cpp" )

@@ -8,9 +8,14 @@
 #ifndef __c0de4un_game_object_hpp__
 #define __c0de4un_game_object_hpp__
 
+// Include string
+#ifndef __c0de4un_string_hpp__
+#include "../cfg/string.hpp"
+#endif // !__c0de4un_string_hpp__
+
 // Include Components
 #ifndef __c0de4un_components_hpp__
-#include "../utils/components/Components.hpp"
+#include "../components/Components.hpp"
 #endif // !__c0de4un_components_hpp__
 
 // GameObject declared
@@ -30,6 +35,13 @@ namespace c0de4un
 	public:
 
 		// -------------------------------------------------------- \\
+
+		// ===========================================================
+		// Constants
+		// ===========================================================
+
+		/* Name */
+		const std::string mName;
 
 		// ===========================================================
 		// Destructor
@@ -81,13 +93,15 @@ namespace c0de4un
 		// -------------------------------------------------------- \\
 
 		// ===========================================================
-		// Constructors
+		// Constructor
 		// ===========================================================
 
 		/*
 		 * GameObject constructor
+		 *
+		 * @param pName - Name.
 		*/
-		explicit GameObject( );
+		explicit GameObject( const std::string & pName );
 
 		// ===========================================================
 		// Deleted

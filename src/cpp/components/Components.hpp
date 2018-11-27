@@ -21,7 +21,13 @@ namespace c0de4un
 	static constexpr ComponentType BODY_COMPONENT = 2;
 
 	/* Position Component Type-ID */
-	static constexpr ComponentType BODY_COMPONENT = 3;
+	static constexpr ComponentType POSITION_COMPONENT = 3;
+
+	/* Rotation Component Type-ID */
+	static constexpr ComponentType ROTATION_COMPONENT = 4;
+
+	/* Scale Component Type-ID */
+	static constexpr ComponentType SCALE_COMPONENT = 5;
 
 }
 

@@ -8,10 +8,53 @@
 #ifndef __c0de4un_sprite_hpp__
 #define __c0de4un_sprite_hpp__
 
+// Include mutex
+#ifndef __c0de4un_mutex_hpp__
+#include "../../cfg/mutex.hpp" // std::mutex, std::unique_lock
+#endif // !__c0de4un_mutex_hpp__
+
 // Include GameObject
 #ifndef __c0de4un_game_object_hpp__
 #include "../GameObject.hpp"
 #endif // !__c0de4un_game_object_hpp__
+
+// Forward-declaration of GLShaderProgram
+#ifndef __c0de4un_gl_shader_program_decl__
+#define __c0de4un_gl_shader_program_decl__
+namespace c0de4un { class GLShaderProgram; }
+#endif // !__c0de4un_gl_shader_program_decl__
+
+// Forward-declaration of  GLTexture2D
+#ifndef __c0de4un_gl_texture_2D_decl__
+#define __c0de4un_gl_texture_2D_decl__
+namespace c0de4un { class GLTexture2D; }
+#endif // !__c0de4un_gl_texture_2D_decl__
+
+// Forward-declaration of GLRenderer
+#ifndef __c0de4un_gl_renderer_decl__
+#define __c0de4un_gl_renderer_decl__
+namespace c0de4un { class GLRenderer; }
+#endif // !__c0de4un_gl_renderer_decl__
+
+// Include Drawable
+#ifndef __c0de4un_drawable_hpp__
+#include "../../renderer/batch/Drawable.hpp"
+#endif // !__c0de4un_drawable_hpp__
+
+// Include Position
+#ifndef __c0de4un_position_hpp__
+#include "../../components/Position.hpp"
+#endif // !__c0de4un_position_hpp__
+
+// Include Rotation
+#ifndef __c0de4un_rotation_hpp__
+#include "../../components/Rotation.hpp"
+#endif // !__c0de4un_rotation_hpp__
+
+// Include Scale
+#ifndef __c0de4un_scale_hpp__
+#include "../../components/Scale.hpp"
+#endif // !__c0de4un_scale_hpp__
 
 // Sprite declared
 #define __c0de4un_sprite_decl__
@@ -35,7 +78,23 @@ namespace c0de4un
 		// Fields
 		// ===========================================================
 
+		/* Shader Program */
+		GLShaderProgram & mShaderProgram;
 
+		/* GLTexture */
+		GLTexture2D & mGLTexture2D;
+
+		/* Drawable */
+		Drawable mDrawable;
+
+		/* Visibility flag */
+		bool mVisible;
+
+		/* Mutex */
+		std::mutex mMutex;
+
+		/* Thread-Lock */
+		std::unique_lock<std::mutex> mLock;
 
 		// ===========================================================
 		// Deleted
@@ -60,13 +119,30 @@ namespace c0de4un
 		// -------------------------------------------------------- \\
 
 		// ===========================================================
+		// Fields
+		// ===========================================================
+
+		/* Position component. */
+		Position mPosition;
+
+		/* Rotation component */
+		Rotation mRotation;
+
+		/* Scale component */
+		Scale mScale;
+
+		// ===========================================================
 		// Constructor & destructor
 		// ===========================================================
 
 		/*
 		 * Sprite constructor
+		 *
+		 * @param pName - Name.
+		 * @param shaderProgram_ - Shader Program.
+		 * @param texture2D_ - 2D Texture.
 		*/
-		explicit Sprite( );
+		explicit Sprite( const std::string & pName, GLShaderProgram & shaderprogram_, GLTexture2D & texture2D_ );
 
 		/* Sprite destructor */
 		virtual ~Sprite( );
@@ -75,37 +151,32 @@ namespace c0de4un
 		// Getter & Setter
 		// ===========================================================
 
-		/*
-		 * Returns for component of the given type.
-		 *
-		 * @thread_safety - not thread-safe.
-		 * @param pTypeID - component type.
-		 * @return - pointer to the component, or null if don't have one.
-		*/
-		virtual void *const getComponent( const ComponentType pTypeID = 0 ) const noexcept final;
+		/* Returns 'TRUE' if visible (added in Sprite-Batching) */
+		const bool isVisible( ) const noexcept;
 
 		// ===========================================================
 		// Methods
 		// ===========================================================
 
 		/*
-		 * Attaches the given component.
+		 * Make this Sprite visible.
+		 * Also load texture & shaders if required.
 		 *
-		 * @thread_safety - thread-safe, synchronization (thread-lock) used.
-		 * @param pTypeID - component type.
-		 * @param pComponent - pointer to the component.
-		 * @throws - can throw std::bad_alloc.
+		 * @thread_safety - render-thread only.
+		 * @param renderSystem_ - GLRenderer. Used for Sprite-Batching.
+		 * @return - 'true' if OK.
+		 * @throws - can throw exception.
 		*/
-		virtual void attachComponent( const ComponentType pTypeID = 0, void *const pComponent = nullptr ) final;
+		const bool Show( GLRenderer *const renderSystem_ );
 
 		/*
-		 * Detaches component of the given type.
+		 * Hide this Sprite (remove from batching-system).
 		 *
-		 * @thread_safety - thread-safe, synchronization (thread-lock) used.
-		 * @param pTypeID - component type.
-		 * @throws - no exceptions.
+		 * @thread_safety - render-thread only.
+		 * @param renderSystem_ - GLRenderer. Used for Sprite-Batching.
+		 * @throws - can throw exception.
 		*/
-		virtual void detachComponent( const ComponentType pTypeID = 0 ) noexcept final;
+		void Hide( GLRenderer *const renderSystem_ );
 
 		// -------------------------------------------------------- \\
 

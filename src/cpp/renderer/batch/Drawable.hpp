@@ -53,15 +53,6 @@ namespace c0de4un
 	struct Drawable final
 	{
 
-		/* Position changed flag */
-		bool positionChanged_;
-
-		/* Rotation changed flag */
-		bool rotationChanged_;
-
-		/* Scale changed flag */
-		bool scaleChanged_;
-
 		/* State changed flag */
 		bool stateChanged_;
 
@@ -77,12 +68,6 @@ namespace c0de4un
 		GLuint shaderProgram_;
 
 		/*
-		 * Object Position vector.
-		 * If changed, translation flag & state flag must be set to notify batching-system.
-		*/
-		//glm::vec3 position_;
-
-		/*
 		 * Object Position component
 		*/
 		Position * position_;
@@ -91,31 +76,43 @@ namespace c0de4un
 		 * Rotation vector in degrees.
 		*/
 		Rotation * rotation_;
-		//glm::vec3 rotation_;
 
 		/*
 		 * Scale vector
 		*/
 		Scale * scale_;
-		//glm::vec3 scale_;
 
 		/*
-		 * Translation (position) Matrix.
-		 *
-		 * Calculated only when required.
+		 * Thread-Lock to synchronize access.
+		 * Used shareable between Components thread-lock,
+		 * owned by Game Object (Entity, Node, etc).
+		*/
+		std::unique_lock<std::mutex> * lock_;
+
+		/*
+		 * Translation Matrix.
+		 * Used to avoid unnecessary re-calculations.
 		*/
 		glm::mat4 translationMat_;
 
 		/*
 		 * Scale Matrix.
-		 * Calculate only when required.
+		 * Used to avoid unnecessary re-calculations.
 		*/
 		glm::mat4 scaleMat_;
 
 		/*
-		 * Model Matrix [Translation * Rotation * Scale]
+		 * Model Matrix.
+		 * Used to avoid recalculating it every time View and/or Projection changed.
 		*/
 		glm::mat4 modelMat_;
+
+		/*
+		 * MVP (Model View Projection) Matrix [Projection * View * Model(Translation * Rotation * Scale)]
+		 * Used to avoid calculating MVP matrix each frame if not required.
+		 * Depends on Camera used for render (draw).
+		*/
+		glm::mat4 mvpMat_;
 
 		/*
 		 * Calculated orientation (rotation) quaternion.
@@ -124,6 +121,46 @@ namespace c0de4un
 		 * Also provides faster rotation changes apply then matrix (matrix * vector).
 		*/
 		glm::quat orientationQuat_;
+
+		/*
+		 * Color values in RGBA format.
+		*/
+		float color_[4];
+
+		/* Drawable default constructor */
+		Drawable( )
+			: stateChanged_( false ),
+			textureObject_( 0 ),
+			shaderProgram_( 0 ),
+			position_( nullptr ),
+			rotation_( nullptr ),
+			scale_( nullptr ),
+			lock_( nullptr ),
+			translationMat_( 1.0f ),
+			scaleMat_( 1.0f ),
+			orientationQuat_( ),
+			modelMat_( ),
+			mvpMat_( ),
+			color_{ 1.0f, 1.0f, 1.0f, 1.0f }
+		{
+		}
+
+		/* Drawable destructor */
+		~Drawable( )
+		{
+		}
+
+		/* @deleted Drawable const copy constructor */
+		Drawable( const Drawable & ) = delete;
+
+		/* @deleted Drawable copy assignment operator */
+		Drawable & operator=( const Drawable & ) = delete;
+
+		/* @deleted Drawable move constructor */
+		Drawable( Drawable && ) = delete;
+
+		/* @deleted Drawable move assignment operator */
+		Drawable & operator=( Drawable && ) = delete;
 
 	};
 

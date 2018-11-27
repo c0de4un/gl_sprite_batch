@@ -21,8 +21,11 @@ namespace c0de4un
 
 	/*
 	 * GameObject constructor
+	 *
+	 * @param pName - Name.
 	*/
-	GameObject::GameObject( )
+	GameObject::GameObject( const std::string & pName )
+		: mName( pName )
 	{
 	}
 

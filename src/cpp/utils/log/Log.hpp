@@ -8,6 +8,9 @@
 #ifndef __c0de4un_log_hpp__
 #define __c0de4un_log_hpp__
 
+// Include std::assert (cassert)
+#include <cassert>
+
 namespace c0de4un
 {
 
