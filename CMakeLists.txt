@@ -364,6 +364,7 @@ set ( ROOT_PROJECT_HEADERS
 "${SOURCES_DIR}/assets/shader/GLShader.hpp"
 "${SOURCES_DIR}/assets/shader/GLShaderProgram.hpp"
 "${SOURCES_DIR}/utils/log/Log.hpp"
+"${SOURCES_DIR}/utils/color/ColorTypes.hpp"
 "${SOURCES_DIR}/objects/GameObject.hpp"
 "${SOURCES_DIR}/objects/sprite/Sprite.hpp"
 "${SOURCES_DIR}/physics/Body.hpp"
