@@ -50,8 +50,18 @@ namespace c0de4un
 		 * @param pName - Name.
 		 * @param vertexShader_ - Vertex Shader.
 		 * @param framgneShader_ - Fragment Shader.
+		 * @param vertexPosAttrName_ - Vertex Position attribute Name.
+		 * @param vertexTexCoordsAttrName_ - Vertex Texture Coordinates attribute Name.
+		 * @param vertexColorAttrName_ - Vertex Color attribute Name.
+		 * @param texUniformName_ - Texture Uniform Name.
+		 * @param mvpUniformName_ - Model View Projection Matrix Uniform name.
 		*/
-		explicit GLShaderProgram( const std::string & pName, GLShader & vertexShader_, GLShader & fragmentShader_ );
+		explicit GLShaderProgram( const std::string & pName, GLShader & vertexShader_, GLShader & fragmentShader_, 
+			const std::string & vertexPosAttrName_, 
+			const std::string & vertexTexCoordsAttrName_, 
+			const std::string & vertexColorAttrName_, 
+			const std::string & texUniformName_, 
+			const std::string & mvpUniformName_ );
 
 		/* GLShaderProgram destructor */
 		~GLShaderProgram( );
@@ -65,6 +75,21 @@ namespace c0de4un
 
 		/* Returns Name */
 		const std::string & getName( ) const noexcept;
+
+		/* Returns Vertex Position attribute index for OpenGL */
+		const GLint & getVertexPosAttrIndex( ) const noexcept;
+
+		/* Returns Vertex Texture Coordinates attribute index for OpenGL */
+		const GLint & getVertexTexCoordsAttrIndex( ) const noexcept;
+
+		/* Returns Vertex Color attribute index for OpenGL */
+		const GLint & getColorAttrIndex( ) const noexcept;
+
+		/* Returns Texture Uniform (public, global) index for OpenGL */
+		const GLint & getTexUniformIndex( ) const noexcept;
+
+		/* Returns Model View Projection (MVP) Matrix Uniform location/index */
+		const GLint & getMVPUniform( ) const noexcept;
 
 		// ===========================================================
 		// Methods
@@ -97,6 +122,21 @@ namespace c0de4un
 		/* Name */
 		const std::string mName;
 
+		/* Vertex Position attribute Name */
+		const std::string mVertexPosAttrName;
+
+		/* Vertex Texture Coordinates attribute Name */
+		const std::string mVertexTexCoordsAttrName;
+
+		/* Vertex Color attribute Name */
+		const std::string mVertexColorAttrName;
+
+		/* Vertex Texture Uniform Name */
+		const std::string mTexUniformName;
+
+		/* Model View Projection Matrix Uniform Name */
+		const std::string mMVPUniformName;
+
 		// ===========================================================
 		// Fields
 		// ===========================================================
@@ -109,6 +149,21 @@ namespace c0de4un
 
 		/* OpenGL Shader Program Object ID */
 		GLuint mProgramObject;
+
+		/* Vertex Position Attribute Index for OpenGL */
+		GLint mVertexPosAttrIndex;
+
+		/* Vertex Color Attribute Index for OpenGL */
+		GLint mVertexColorAttrIndex;
+
+		/* Vertex Texture Coordinates Attribute Index */
+		GLint mVertexTexCoordsAttrIndex;
+
+		/* Texture Uniform Index for OpenGL */
+		GLint mTexUniformIndex;
+
+		/* MVP (Model View Projection) Matrix attribute Index for OpenGL */
+		GLint mMVPMatUniformLoc;
 
 		// ===========================================================
 		// Deleted

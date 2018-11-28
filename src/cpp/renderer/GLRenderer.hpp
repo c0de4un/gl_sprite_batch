@@ -18,6 +18,11 @@
 #include "../cfg/vector.hpp"
 #endif // !__c0de4un_vector_hpp__
 
+// Include opengl
+#ifndef __c0de4un_opengl_hpp__
+#include "../cfg/opengl.hpp"
+#endif // !__c0de4un_opengl_hpp__
+
 // Include Drawable
 #ifndef __c0de4un_drawable_hpp__
 #include "batch/Drawable.hpp"
@@ -35,17 +40,11 @@ namespace c0de4un { struct BatchInfo; }
 namespace c0de4un { struct BatchRequest; }
 #endif // !__c0de4un_batch_request_decl__
 
-// Forward-declaration of ViewProjection
-#ifndef __c0de4un_view_projection_decl__
-#define __c0de4un_view_projection_decl__
-namespace c0de4un { struct ViewProjection; }
-#endif // !__c0de4un_view_projection_decl__
-
-// Forward-declare GLCamera
-#ifndef __c0de4un_gl_camera_decl__
-#define __c0de4un_gl_camera_decl__
-namespace c0de4un { class GLCamera; }
-#endif // !__c0de4un_gl_camera_decl__
+// Forward-declare GLCamera2D
+#ifndef __c0de4un_gl_camera_2D_decl__
+#define __c0de4un_gl_camera_2D_decl__
+namespace c0de4un { class GLCamera2D; }
+#endif // !__c0de4un_gl_camera_2D_decl__
 
 // GLRenderer declared
 #define __c0de4un_gl_renderer_decl__
@@ -124,24 +123,6 @@ namespace c0de4un
 		/* Map to sort Drawable-Objects by Shader Programs & Textures */
 		programs_map_t mPrograms;
 
-		/* Thread-Lock to synchronize access */
-		std::unique_lock<std::mutex> mLock;
-
-		/* Mutex */
-		std::mutex mMutex_;
-
-		/* Vertex Array Object */
-		GLuint mVAO_;
-
-		/* Vertex Buffer Object ('VBO') for Vertices-Position data */
-		GLuint verticesPosition_VBO_;
-
-		/* Vertex Buffer Object ('VBO', 'IBO') for indices */
-		GLuint indices_VBO_;
-
-		/* Vertex Buffer Object ('VBO') for Texture Coordinates */
-		GLuint textureCoords_VBO_;
-
 		// ===========================================================
 		// Deleted
 		// ===========================================================
@@ -167,10 +148,10 @@ namespace c0de4un
 		 *
 		 * @thread_safety - render-thread only.
 		 * @param pDrawable - Drawable-Component.
-		 * @param mvpMatUniformIndex_ - 
-		 * @param viewProjection_ - 
+		 * @param mvpMatUniformIndex_ - Model View Projection Matrix location/index.
+		 * @param pCamera2D - 2D Camera.
 		*/
-		inline void drawSprite( Drawable *const pDrawable, const GLuint & mvpMatUniformIndex_, const ViewProjection & viewProjection_ );
+		void drawSprite( Drawable *const pDrawable, const GLuint & mvpMatUniformIndex_, const GLCamera2D *const pCamera2D );
 
 		/*
 		 * Load Sprite-Batch.
@@ -270,7 +251,7 @@ namespace c0de4un
 		 * @param pCamera - 2D-Camera.
 		 * @throws - can throw exception.
 		*/
-		inline void Draw( GLCamera & pCamera );
+		void Draw( GLCamera2D *const pCamera2D );
 
 		// -------------------------------------------------------- \\
 

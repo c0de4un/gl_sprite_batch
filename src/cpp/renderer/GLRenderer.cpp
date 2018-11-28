@@ -20,10 +20,10 @@
 #include "batch/BatchRequest.hpp"
 #endif // !__c0de4un_batch_request_hpp__
 
-// Include GLCamera
-#ifndef __c0de4un_gl_camera_hpp__
-#include "../camera/GLCamera.hpp"
-#endif // !__c0de4un_gl_camera_hpp__
+// Include GLCamera2D
+#ifndef __c0de4un_gl_camera_2D_hpp__
+#include "../camera/GLCamera2D.hpp"
+#endif // !__c0de4un_gl_camera_2D_hpp__
 
 // Include Log
 #ifndef __c0de4un_log_hpp__
@@ -45,28 +45,36 @@ namespace c0de4un
 	 * @throws - std::bad_alloc.
 	*/
 	GLRenderer::GLRenderer( )
-		: mPrograms( ),
-		mMutex_( ),
-		mLock( mMutex_, std::defer_lock ),
-		mVerticesPosition
-		{
-			-1.0f, -1.0f, 0.0f, 1.0f,
-			1.0f, -1.0f, 0.0f, 1.0f,
-			1.0f, 0.1f, 0.0f, 1.0f,
-			-1.0f, 1.0f, 0.0f, 1.0f
-		},
-		mVerticesIndices{ 0, 1, 2, 2, 3, 0 },
-		mVerticesTextureCoords{ 0.0f, 0.0f, 1.0f, 1.0f },
-		mVAO_( 0 ),
-		verticesPosition_VBO_( 0 ),
-		indices_VBO_( 0 ),
-		textureCoords_VBO_( 0 )
+		//: mVerticesPosition
+		//{
+		//	-1.0f, -1.0f, 0.0f, 1.0f,
+		//	1.0f, -1.0f, 0.0f, 1.0f,
+		//	1.0f, 1.0f, 0.0f, 1.0f,
+		//	-1.0f, 1.0f, 0.0f, 1.0f
+		//},
+		: mVerticesPosition
 	{
+		-1.0f, -1.0f, 0.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 0.0f, 1.0f,
+		-1.0f, 1.0f, 0.0f, 1.0f
+	},
+		mVerticesIndices{ 0, 1, 2, 2, 3, 0 },
+		mVerticesTextureCoords{ 0.0f, 0.0f, 1.0f, 1.0f }
+	{
+
+		// Log
+		Log::printDebug( "GLRenderer::constructor" );
+
 	}
 
 	/* GLRenderer destructor */
 	GLRenderer::~GLRenderer( )
 	{
+
+		// Log
+		Log::printDebug( "GLRenderer::destructor" );
+
 	}
 
 	// ===========================================================
@@ -87,7 +95,7 @@ namespace c0de4un
 	{
 
 #ifdef DEBUG // DEBUG
-		assert( batchInfo.vaoID_ > 0 ); // Already Loaded
+		assert( batchInfo.vaoID_ < 1 ); // Already Loaded
 #endif // DEBUG
 
 		// Create OpenGL Vertex Buffer Objects (VBOs)
@@ -148,14 +156,20 @@ namespace c0de4un
 		// Bind VAO (OpenGL Vertex Array Object)
 		glBindVertexArray( batchInfo.vaoID_ );
 
-		// Bind 2D-Texture Coordinates Buffer Object
-		glBindBuffer( GL_ARRAY_BUFFER, batchInfo.vboIDs_[BatchInfo::TEXTURE_COORDS_VBO] );
+		// 2D-Texture
+		if ( hasTexture )
+		{
 
-		// Enable 'Texture Coordinates' Attribute Array
-		glEnableVertexAttribArray( batchInfo.texCoordsAttrIndex_ );
+			// Bind 2D-Texture Coordinates Buffer Object
+			glBindBuffer( GL_ARRAY_BUFFER, batchInfo.vboIDs_[BatchInfo::TEXTURE_COORDS_VBO] );
 
-		// Point OpenGL to 'Vertex Texture Coordinates' data
-		glVertexAttribPointer( batchInfo.texCoordsAttrIndex_, TEXTURE_COORD_SIZE, GL_FLOAT, GL_FALSE, 0, (GLvoid*) 0 ); // (GLvoid*) 0 - to use binded Buffer Object.
+			// Enable 'Texture Coordinates' Attribute Array
+			glEnableVertexAttribArray( batchInfo.texCoordsAttrIndex_ );
+
+			// Point OpenGL to 'Vertex Texture Coordinates' data
+			glVertexAttribPointer( batchInfo.texCoordsAttrIndex_, TEXTURE_COORD_SIZE, GL_FLOAT, GL_FALSE, 0, (GLvoid*) 0 ); // (GLvoid*) 0 - to use binded Buffer Object.
+
+		}
 
 		// Bind Vertex Position Buffer Object
 		glBindBuffer( GL_ARRAY_BUFFER, batchInfo.vboIDs_[BatchInfo::POSITION_VBO] );
@@ -409,17 +423,30 @@ namespace c0de4un
 
 		// Search BatchInfo
 		programs_map_t::const_iterator programsIterator_ = mPrograms.find( batchRequest.shaderProgram_ );
-
-		// Add BatchInfo
-		if ( programsIterator_ == mPrograms.cend( ) )
-			mPrograms.insert( std::pair<const GLuint, BatchInfo>( batchRequest.shaderProgram_, { batchRequest.vertexPosAttrIndex_, batchRequest.texCoordsAttrIndex_, batchRequest.colorAttrIndex_, batchRequest.mvpMatUniformIndex_, { 0, 0, 0 }, 0, std::map<const GLuint, std::vector<Drawable*>>( ) } ) );
 		
 		// Get BatchInfo
 		BatchInfo & batchInfo_ = mPrograms[batchRequest.shaderProgram_];
 
-		// Load Sprite-Batch
-		if ( batchInfo_.vboIDs_[0] < 1 )
+		// SpriteBatch empty
+		if ( batchInfo_.vboIDs_[0] < 1 && batchInfo_.vertexPosAttrIndex_ < 0 )
+		{
+
+			// Set SpriteBatch 'Vertex Position' attribute index
+			batchInfo_.vertexPosAttrIndex_ = batchRequest.vertexPosAttrIndex_;
+
+			// Set SpriteBatch 'Vertex Color' attribute index
+			batchInfo_.colorAttrIndex_ = batchRequest.colorAttrIndex_;
+
+			// Set SpriteBatch 'Texture Coordinates' attribute index
+			batchInfo_.texCoordsAttrIndex_ = batchRequest.texCoordsAttrIndex_;
+
+			// MVP (Model View Projection) Matrix uniform location/index
+			batchInfo_.mvpMatUniformLoc_ = batchRequest.mvpMatUniformIndex_;
+
+			// Load Sprite-Batch
 			loadSpriteBatch( batchRequest.textureObject_ > 0, batchInfo_ );
+
+		}
 
 		// Add Drawable
 		batchInfo_.textureObjects_[batchRequest.textureObject_].push_back( batchRequest.drawable_ );
@@ -441,7 +468,6 @@ namespace c0de4un
 #ifdef DEBUG // DEBUG
 		assert( pDrawable != nullptr );
 		assert( shaderProgram_ > 0 );
-		assert( texture2D_ > 0 );
 #endif // DEBUG
 
 		// Search BatchInfo
@@ -495,7 +521,8 @@ namespace c0de4un
 		if ( drawableObjects_.size( ) > 2 )
 		{
 			// Swap
-			std::iter_swap( *drawableIterator_, drawableObjects_.back( ) );
+			std::swap( *drawableIterator_, drawableObjects_.back( ) );
+			//std::iter_swap( drawableIterator_, drawableObjects_.back( ) );
 
 			// Pop
 			drawableObjects_.pop_back( );
@@ -522,83 +549,37 @@ namespace c0de4un
 	 *
 	 * @thread_safety - render-thread only.
 	 * @param pDrawable - Drawable-Component.
+	 * @param mvpMatUniformIndex_ - Model View Projection Matrix location/index.
+	 * @param pCamera2D - 2D Camera.
 	*/
-	void GLRenderer::drawSprite( Drawable *const pDrawable, const GLuint & mvpMatUniformIndex_, const ViewProjection & viewProjection_ )
+	void GLRenderer::drawSprite( Drawable *const pDrawable, const GLuint & mvpMatUniformIndex_, const GLCamera2D *const pCamera2D )
 	{
 
 #ifdef DEBUG // DEBUG
 		assert( pDrawable != nullptr );
+		assert( mvpMatUniformIndex_ >= 0 );
 #endif // DEBUG
 
 		// Update Matrices
-		if ( !viewProjection_.updated_ || pDrawable->stateChanged_ )
+		if ( !pCamera2D->updated_ || pDrawable->stateChanged_ )
 		{
 
-			// Update Model Matrix
-			bool updateModelMat_( false );
+			// Model Identity-Matrix
+			glm::mat4 modelMat_( 1.0f );
 
-			// Translation
-			if ( pDrawable->position_->changed_ )
-			{
+			// Translate Model Matrix
+			glm::translate( modelMat_, pDrawable->position_->vec3_ );
 
-				// Calculate Translation Matrix
-				pDrawable->translationMat_ = glm::translate( glm::mat4( 1.0f ), pDrawable->position_->vec3_ );
+			// Rotate Model Matrix
+			modelMat_ = glm::rotate( modelMat_, glm::radians( pDrawable->rotation_->vec3_.x ), glm::vec3( 1.0f, 0.0f, 0.0f ) ); // X
+			modelMat_ = glm::rotate( modelMat_, glm::radians( pDrawable->rotation_->vec3_.y ), glm::vec3( 0.0f, 1.0f, 0.0f ) ); // Y
+			modelMat_ = glm::rotate( modelMat_, glm::radians( pDrawable->rotation_->vec3_.z ), glm::vec3( 0.0f, 0.0f, 1.0f ) ); // Z
 
-				// Reset Translation update flag
-				pDrawable->position_->changed_ = false;
+			// Scale Model Matrix
+			modelMat_ = glm::scale( modelMat_, pDrawable->scale_->vec3_ );
 
-				// Set Update Model Matrix flag
-				updateModelMat_ = true;
-
-			}
-
-			// Rotation
-			if ( pDrawable->rotation_->changed_ )
-			{
-
-				// X-Axis
-				pDrawable->orientationQuat_ = glm::rotate( glm::quat( ), pDrawable->rotation_->vec3_.x, glm::vec3( 1.0f, 0.0f, 0.0f ) );
-
-				// Y-Axis
-				pDrawable->orientationQuat_ = glm::rotate( pDrawable->orientationQuat_, pDrawable->rotation_->vec3_.y, glm::vec3( 0.0f, 1.0f, 0.0f ) );
-
-				// Z-Axis
-				pDrawable->orientationQuat_ = glm::rotate( pDrawable->orientationQuat_, pDrawable->rotation_->vec3_.z, glm::vec3( 0.0f, 0.0f, 1.0f ) );
-
-				// Reset Rotation update flag
-				pDrawable->rotation_->changed_ = false;
-
-				// Set Update Model Matrix flag
-				updateModelMat_ = true;
-
-			}
-
-			// Scale
-			if ( pDrawable->scale_->changed_ )
-			{
-
-				// Calculate Scale Matrix
-				pDrawable->scaleMat_ = glm::scale( pDrawable->scale_->vec3_ );
-
-				// Reset Scale update flag
-				pDrawable->scale_->changed_ = false;
-
-				// Set Update Model Matrix flag
-				updateModelMat_ = true;
-
-			}
-
-			// MVP
-			if ( !viewProjection_.updated_ || updateModelMat_ )
-			{
-
-				// Recalculate Drawable Model Matrix
-				pDrawable->modelMat_ = pDrawable->translationMat_ * glm::mat4_cast( pDrawable->orientationQuat_ ) * pDrawable->scaleMat_;
-
-				// Recalculate Drawable MVP Matrix
-				pDrawable->mvpMat_ = ( pDrawable->modelMat_ * viewProjection_.viewMat_ ) * viewProjection_.projectionMat_;
-
-			}
+			// Model-View-Projection Matrix (MVP)
+			pDrawable->mvpMat_ = pCamera2D->projectionMat_ * pCamera2D->viewMat_ * modelMat_;
 
 			// Set Drawable state changed flag
 			pDrawable->stateChanged_ = false;
@@ -608,8 +589,35 @@ namespace c0de4un
 		// Upload Mesh (Sprite) Model-View-Projection Matrix to the Vertex Shader
 		glUniformMatrix4fv( mvpMatUniformIndex_, 1, GL_FALSE, glm::value_ptr( pDrawable->mvpMat_ ) );
 
+		//// Model Matrix
+		//glm::mat4 modelMat_( 1.0f );
+		//modelMat_ = glm::translate( modelMat_, glm::vec3( 0.0f, 0.0f, 0.0f ) );
+		//modelMat_ = glm::rotate( modelMat_, glm::radians(0.0f), glm::vec3( 1.0f, 0.0f, 0.0f ) );
+		//modelMat_ = glm::rotate( modelMat_, glm::radians( 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
+		//modelMat_ = glm::rotate( modelMat_, glm::radians( 0.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+		//modelMat_ = glm::scale( modelMat_, glm::vec3( 100.0f, 100.0f, 0.0f ) );
+		//
+		//// View Matrix
+		//glm::vec3 camPos_( 0.0f, 0.0f, 0.0f );
+		//glm::vec3 camUp_( 0.0f, 1.0f, 0.0f );
+		//glm::vec3 camFront_( 0.0f, 0.0f, -1.0f );
+		//glm::mat4 viewMat_( 1.0f );
+		//viewMat_ = glm::lookAt( camPos_, camPos_ + camFront_, camUp_ );
+		//
+		//// Projection Matrix
+		//const float nearZ = 0.01f;
+		//const float farZ = 2.0f;
+		//glm::mat4 projectionMat_( 1.0f );
+		//projectionMat_ = glm::ortho( 0.0f, 1280.0f, 0.0f, 720.0f, 0.f, 1.f );
+
+		//// View & Projection
+		//const glm::mat4 mvpMat_ = projectionMat_ * viewMat_ * modelMat_;
+
+		//// Upload Mesh (Sprite) Model-View-Projection Matrix to the Vertex Shader
+		//glUniformMatrix4fv( mvpMatUniformIndex_, 1, GL_FALSE, glm::value_ptr( mvpMat_ ) );
+
 		// Draw Elements (render with indices)
-		glDrawElements( GL_TRIANGLES, INDICES_COUNT, GL_UNSIGNED_SHORT, (const void *const) 0 );
+		glDrawElements( GL_TRIANGLES, INDICES_COUNT, GL_UNSIGNED_SHORT, (const void *) 0 );
 
 	}
 
@@ -620,14 +628,8 @@ namespace c0de4un
 	 * @param pCamera - 2D-Camera.
 	 * @throws - can throw exception.
 	*/
-	void GLRenderer::Draw( GLCamera & pCamera )
+	void GLRenderer::Draw( GLCamera2D *const pCamera2D )
 	{
-
-#ifdef DEBUG // DEBUG
-		// Check OpenGL Buffers state (VBOs, VAO)
-		if ( mVAO_ < 1 )
-			throw std::exception( "GLRenderer::Draw - Buffers not prepared ! Call #loadSpriteBatch before drawing !" );
-#endif // DEBUG
 
 		// Get Shader Programs map iterator
 		programs_map_t::iterator programsIterator_ = mPrograms.begin( );
@@ -658,17 +660,19 @@ namespace c0de4un
 			std::map<const GLuint, std::vector<Drawable*>>::const_iterator texturesEnd_ = batchInfo_.textureObjects_.cend( );
 
 			// Lock the Camera thread-lock
-			pCamera.lock_.lock( );
+			pCamera2D->lock_.lock( );
 
 			// Update Camera View & Projection Matrices
-			if ( !pCamera.viewProjection_.updated_ )
+			if ( !pCamera2D->updated_ )
 			{
 
-				// Calculate Camera LooAt (View) Matrix
-				pCamera.viewProjection_.viewMat_ = glm::lookAt( pCamera.position_, pCamera.target_, pCamera.up_ );
+				// Calculate View Matrix
+				const glm::vec3 cameraUp_( 0.0f, 1.0f, 0.0f );
+				const glm::vec3 cameraFront_( 0.0f, 0.0f, -1.0f );
+				pCamera2D->viewMat_ = glm::lookAt( pCamera2D->position_, pCamera2D->position_ + cameraFront_, cameraUp_ );
 
-				// Calculate Camera Projection Matrix
-				pCamera.viewProjection_.projectionMat_ = glm::ortho( pCamera.frustumX, pCamera.frustumWidth, pCamera.frustumY, pCamera.frustumHeight, pCamera.zNear, pCamera.zFar );
+				// Calculate Projection Matrix
+				pCamera2D->projectionMat_ = glm::ortho( pCamera2D->frustum_[0], pCamera2D->frustum_[1], pCamera2D->frustum_[2], pCamera2D->frustum_[3], pCamera2D->frustum_[4], pCamera2D->frustum_[5] );
 
 			}
 
@@ -691,10 +695,11 @@ namespace c0de4un
 					drawable_->lock_->lock( );
 
 					// Transfer (Upload) current Color-values (same color for all vertices)
-					glVertexAttrib4fv( batchInfo_.colorAttrIndex_, drawable_->color_ );
+					if ( batchInfo_.colorAttrIndex_ >= 0 )
+						glVertexAttrib4fv( batchInfo_.colorAttrIndex_, drawable_->color_ );
 
 					// Draw Sprite
-					drawSprite( drawable_, batchInfo_.mvpUniformIndex_, pCamera.viewProjection_ );
+					drawSprite( drawable_, batchInfo_.mvpMatUniformLoc_, pCamera2D );
 
 					// Unlock Drawable
 					drawable_->lock_->unlock( );
@@ -711,10 +716,10 @@ namespace c0de4un
 			}
 
 			// Reset Camera Matrices Update flag
-			pCamera.viewProjection_.updated_ = true;
+			pCamera2D->updated_ = true;
 
 			// Unlock the Camera thread-lock
-			pCamera.lock_.unlock( );
+			pCamera2D->lock_.unlock( );
 
 			// Unbind (bind the default) VAO
 			glBindVertexArray( 0 );

@@ -40,12 +40,31 @@ namespace c0de4un
 	 * @param pName - Name.
 	 * @param vertexShader_ - Vertex Shader.
 	 * @param framgneShader_ - Fragment Shader.
+	 * @param vertexPosAttrName_ - Vertex Position attribute Name.
+	 * @param vertexTexCoordsAttrName_ - Vertex Texture Coordinates attribute Name.
+	 * @param vertexColorAttrName_ - Vertex Color attribute Name.
+	 * @param texUniformName_ - Texture Uniform Name.
+	 * @param mvpUniformName_ - Model View Projection Matrix Uniform name.
 	*/
-	GLShaderProgram::GLShaderProgram( const std::string & pName, GLShader & vertexShader_, GLShader & fragmentShader_ )
+	GLShaderProgram::GLShaderProgram( const std::string & pName, GLShader & vertexShader_, GLShader & fragmentShader_,
+		const std::string & vertexPosAttrName_,
+		const std::string & vertexTexCoordsAttrName_,
+		const std::string & vertexColorAttrName_,
+		const std::string & texUniformName_, 
+		const std::string & mvpUniformName_ )
 		: mName( pName ),
 		mVertexShader( vertexShader_ ),
 		mFragmentShader( fragmentShader_ ),
-		mProgramObject( 0 )
+		mProgramObject( 0 ),
+		mVertexPosAttrName( vertexPosAttrName_ ),
+		mVertexTexCoordsAttrName( vertexTexCoordsAttrName_ ),
+		mVertexColorAttrName( vertexColorAttrName_ ),
+		mTexUniformName( texUniformName_ ),
+		mMVPUniformName( mvpUniformName_ ),
+		mVertexPosAttrIndex( -1 ),
+		mVertexColorAttrIndex( -1 ),
+		mVertexTexCoordsAttrIndex( -1 ),
+		mTexUniformIndex( -1 )
 	{
 
 		// Log
@@ -79,6 +98,26 @@ namespace c0de4un
 	/* Returns Name */
 	const std::string & GLShaderProgram::getName( ) const noexcept
 	{ return( mName ); }
+
+	/* Returns Vertex Position attribute index for OpenGL */
+	const GLint & GLShaderProgram::getVertexPosAttrIndex( ) const noexcept
+	{ return( mVertexPosAttrIndex ); }
+
+	/* Returns Vertex Texture Coordinates attribute index for OpenGL */
+	const GLint & GLShaderProgram::getVertexTexCoordsAttrIndex( ) const noexcept
+	{ return( mVertexTexCoordsAttrIndex ); }
+
+	/* Returns Vertex Color attribute index for OpenGL */
+	const GLint & GLShaderProgram::getColorAttrIndex( ) const noexcept
+	{ return( mVertexColorAttrIndex ); }
+
+	/* Returns Texture Uniform (public, global) index for OpenGL */
+	const GLint & GLShaderProgram::getTexUniformIndex( ) const noexcept
+	{ return( mTexUniformIndex ); }
+
+	/* Returns Model View Projection (MVP) Matrix attribute index */
+	const GLint & GLShaderProgram::getMVPUniform( ) const noexcept
+	{ return( mMVPMatUniformLoc ); }
 
 	// ===========================================================
 	// Methods
@@ -137,18 +176,135 @@ namespace c0de4un
 		}
 
 		// Create Program Object, attach Shaders & Link
-		if ( GLRenderer::loadProgram( mProgramObject, mVertexShader.getShaderObject( ), mFragmentShader.getShaderObject( ) ) )
+		if ( !GLRenderer::loadProgram( mProgramObject, mVertexShader.getShaderObject( ), mFragmentShader.getShaderObject( ) ) )
 		{
 
 			// Log
 			logMsg = "GLShaderProgram#";
 			logMsg += mName;
 			logMsg += "::Load - failed to link Shader Program";
-			logMsg += mFragmentShader.getName( );
 			Log::printWarning( logMsg.c_str( ) );
 
 			// Return FALSE
 			return( false );
+
+		}
+
+		// Search Vertex Position attribute index
+		mVertexPosAttrIndex = glGetAttribLocation( mProgramObject, mVertexPosAttrName.c_str( ) );
+
+		// Check if Attribute Location Found
+		if ( mVertexPosAttrIndex < 0 )
+		{
+			// Log Message
+			std::string logMsg( "GLShaderProgram#" );
+			logMsg += mName;
+
+			// Append Details
+			logMsg += "::Load - Vertex Position Attribute Location not found !";
+
+			// Print Message to Log
+			Log::printError( logMsg.c_str( ) );
+
+			// Return FALSE
+			return( false );
+		}
+
+		// Texture Coordinates Attribute
+		if ( !mVertexTexCoordsAttrName.empty( ) )
+		{
+
+			// Search Vertex Texture Coordinates attribute index
+			mVertexTexCoordsAttrIndex = glGetAttribLocation( mProgramObject, mVertexTexCoordsAttrName.c_str( ) );
+
+			// Check if Attribute Location Found
+			if ( mVertexTexCoordsAttrIndex < 0 )
+			{
+				// Log Message
+				std::string logMsg( "GLShaderProgram#" );
+				logMsg += mName;
+
+				// Append Details
+				logMsg += "::Load - Vertex Texture Coordinates Attribute Location not found !";
+
+				// Print Message to Log
+				Log::printError( logMsg.c_str( ) );
+
+				// Return FALSE
+				return( false );
+			}
+
+		}
+
+		// Search Vertex Color attribute index
+		mVertexColorAttrIndex = glGetAttribLocation( mProgramObject, mVertexColorAttrName.c_str( ) );
+
+		// Check if Attribute Location Found
+		if ( mVertexColorAttrIndex < 0 )
+		{
+			// Log Message
+			std::string logMsg( "GLShaderProgram#" );
+			logMsg += mName;
+
+			// Append Details
+			logMsg += "::Load - Vertex Color Attribute Location not found !";
+
+			// Print Message to Log
+			Log::printError( logMsg.c_str( ) );
+
+			// Return FALSE
+			return( false );
+		}
+
+		// Texture Uniform #0
+		if ( mVertexTexCoordsAttrIndex > 0 )
+		{
+
+			// Search Texture Uniform index
+			mTexUniformIndex = glGetAttribLocation( mProgramObject, mTexUniformName.c_str( ) );
+
+			// Check if Attribute Location Found
+			if ( mTexUniformIndex < 0 )
+			{
+				// Log Message
+				std::string logMsg( "GLShaderProgram#" );
+				logMsg += mName;
+
+				// Append Details
+				logMsg += "::Load - Texture Uniform #0 Location not found !";
+
+				// Print Message to Log
+				Log::printError( logMsg.c_str( ) );
+
+				// Return FALSE
+				return( false );
+			}
+
+		}
+
+		// MVP Matrix
+		if ( !mMVPUniformName.empty( ) )
+		{
+
+			// Search MVP (Model View Projection) Matrix Uniform location/index
+			mMVPMatUniformLoc = glGetUniformLocation( mProgramObject, mMVPUniformName.c_str( ) );
+
+			// Check if Location Found
+			if ( mMVPMatUniformLoc < 0 )
+			{
+				// Log Message
+				std::string logMsg( "GLShaderProgram#" );
+				logMsg += mName;
+
+				// Append Details
+				logMsg += "::Load - Model-View-Projection Matrix uniform Location not found !";
+
+				// Print Message to Log
+				Log::printError( logMsg.c_str( ) );
+
+				// Return FALSE
+				return( false );
+			}
 
 		}
 
@@ -175,6 +331,18 @@ namespace c0de4un
 
 		// Delete Shader Program Object
 		glDeleteProgram( mProgramObject );
+
+		// Reset Vertex Position attribute Index
+		mVertexPosAttrIndex = -1;
+
+		// Reset Vertex Texture Coordinates attribute Index
+		mVertexTexCoordsAttrIndex = -1;
+
+		// Reset Vertex Color attribute Index
+		mVertexColorAttrIndex = -1;
+
+		// Reset Texture Uniform #0 Index
+		mTexUniformIndex = -1;
 
 		// Reset Shader Program Object ID
 		mProgramObject = 0;

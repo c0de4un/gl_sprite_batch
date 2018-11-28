@@ -358,8 +358,8 @@ set ( ROOT_PROJECT_HEADERS
 "${SOURCES_DIR}/components/Position.hpp"
 "${SOURCES_DIR}/components/Rotation.hpp"
 "${SOURCES_DIR}/components/Scale.hpp"
-"${SOURCES_DIR}/camera/ViewProjection.hpp"
-"${SOURCES_DIR}/camera/GLCamera.hpp"
+"${SOURCES_DIR}/camera/GLCamera2D.hpp"
+"${SOURCES_DIR}/assets/image/PNGImage.hpp"
 "${SOURCES_DIR}/assets/texture/GLTexture2D.hpp"
 "${SOURCES_DIR}/assets/shader/GLShader.hpp"
 "${SOURCES_DIR}/assets/shader/GLShaderProgram.hpp"
@@ -378,9 +378,10 @@ set ( ROOT_PROJECT_HEADERS
 
 # Sample-Project Sources
 set ( ROOT_PROJECT_SOURCES
-"${SOURCES_DIR}/camera/GLCamera.cpp"
+"${SOURCES_DIR}/camera/GLCamera2D.cpp"
 "${SOURCES_DIR}/utils/log/Log.cpp"
 "${SOURCES_DIR}/objects/GameObject.cpp"
+"${SOURCES_DIR}/assets/image/PNGImage.cpp"
 "${SOURCES_DIR}/assets/texture/GLTexture2D.cpp"
 "${SOURCES_DIR}/assets/shader/GLShader.cpp"
 "${SOURCES_DIR}/assets/shader/GLShaderProgram.cpp"

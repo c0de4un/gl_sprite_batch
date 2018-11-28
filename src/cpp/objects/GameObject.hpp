@@ -50,42 +50,6 @@ namespace c0de4un
 		/* GameObject destructor */
 		virtual ~GameObject( );
 
-		// ===========================================================
-		// Getter & Setter
-		// ===========================================================
-
-		/*
-		 * Returns for component of the given type.
-		 *
-		 * @thread_safety - not thread-safe.
-		 * @param pTypeID - component type.
-		 * @return - pointer to the component, or null if don't have one.
-		*/
-		virtual void *const getComponent( const ComponentType pTypeID = 0 ) const noexcept = 0;
-
-		// ===========================================================
-		// Methods
-		// ===========================================================
-
-		/*
-		 * Attaches the given component.
-		 *
-		 * @thread_safety - thread-safe, synchronization (thread-lock) used.
-		 * @param pTypeID - component type.
-		 * @param pComponent - pointer to the component.
-		 * @throws - can throw std::bad_alloc.
-		*/
-		virtual void attachComponent( const ComponentType pTypeID = 0, void *const pComponent = nullptr ) = 0;
-
-		/*
-		 * Detaches component of the given type.
-		 *
-		 * @thread_safety - thread-safe, synchronization (thread-lock) used.
-		 * @param pTypeID - component type.
-		 * @throws - no exceptions.
-		*/
-		virtual void detachComponent( const ComponentType pTypeID = 0 ) noexcept = 0;
-
 		// -------------------------------------------------------- \\
 
 	protected:

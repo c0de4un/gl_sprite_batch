@@ -20,6 +20,16 @@
 #include "../../assets/texture/GLTexture2D.hpp"
 #endif // !__c0de4un_gl_texture_2D_hpp__
 
+// Include BatchRequest
+#ifndef __c0de4un_batch_request_hpp__
+#include "../../renderer/batch/BatchRequest.hpp"
+#endif // !__c0de4un_batch_request_hpp__
+
+// Include GLRenderer
+#ifndef __c0de4un_gl_renderer_hpp__
+#include "../../renderer/GLRenderer.hpp"
+#endif // !__c0de4un_gl_renderer_hpp__
+
 // Include Log
 #ifndef __c0de4un_log_hpp__
 #include "../../utils/log/Log.hpp"
@@ -50,7 +60,7 @@ namespace c0de4un
 		mLock( mMutex, std::defer_lock ),
 		mPosition { false, glm::vec3( 0.0f, 0.0f, 0.0f ), &mLock },
 		mRotation { false, glm::vec3( 0.0f, 0.0f, 0.0f ), &mLock },
-		mScale { false, glm::vec3( 0.0f, 0.0f, 0.0f ), &mLock }
+		mScale { false, glm::vec3( 100.0f, 100.0f, 0.0f ), &mLock }
 	{
 
 		// Log
@@ -95,7 +105,7 @@ namespace c0de4un
 	 * @throws - can throw exception.
 	*/
 	const bool Sprite::Show( GLRenderer *const renderSystem_ )
-	{// TODO Sprite::Show
+	{
 
 		// Cancel
 		if ( mVisible )
@@ -127,7 +137,7 @@ namespace c0de4un
 		}
 
 		// Load 2D-Texture
-		if ( !mGLTexture2D.Load( ) )
+		if ( mGLTexture2D != nullptr && !mGLTexture2D->Load( ) )
 		{
 
 			// Log
@@ -142,22 +152,64 @@ namespace c0de4un
 
 		}
 
+		// Set OpenGL Texture Object ID
+		mDrawable.textureObject_ = mGLTexture2D != nullptr ? mGLTexture2D->getTextureObject( ) : 0;
+
+		// Set OpenGL Shader Program ID
+		mDrawable.shaderProgram_ = mShaderProgram.getProgramObject( );
+
 		// Set Drawable Position
 		mDrawable.position_ = &mPosition;
+		mDrawable.position_->changed_ = true;
 
 		// Set Drawable Rotation
 		mDrawable.rotation_ = &mRotation;
+		mDrawable.rotation_->changed_ = true;
 
 		// Set Drawable Scale
 		mDrawable.scale_ = &mScale;
+		mDrawable.scale_->changed_ = true;
 
-		// 
+		// Set Drawable Lock
+		mDrawable.lock_ = &mLock;
+
+		// Set State changed flag
+		mDrawable.stateChanged_ = true;
+
+		// Create BatchRequest
+		BatchRequest batchRequest_;
+
+		// Set Shader Program Object
+		batchRequest_.shaderProgram_ = mDrawable.shaderProgram_;
+
+		// Set Vertex Position attribute location/index
+		batchRequest_.vertexPosAttrIndex_ = mShaderProgram.getVertexPosAttrIndex( );
+
+		// Set Vertex Color attribute location/index
+		batchRequest_.colorAttrIndex_ = mShaderProgram.getColorAttrIndex( );
+
+		// Set Vertex 2D-Texture Coordinates attribute location/index
+		batchRequest_.texCoordsAttrIndex_ = mShaderProgram.getVertexTexCoordsAttrIndex( );
+
+		// Set MVP (Model View Projection) Matrix uniform location/index
+		batchRequest_.mvpMatUniformIndex_ = mShaderProgram.getMVPUniform( );
+
+		// Set Drawable
+		batchRequest_.drawable_ = &mDrawable;
+
+		// Set 2D-Texture Sampler
+
+		// Add Drawable to batching
+		renderSystem_->addDrawable( batchRequest_ );
 
 		// Set Visible flag
 		mVisible = true;
 
 		// Unlock
 		mLock.unlock( );
+
+		// Return TRUE
+		return( true );
 
 	}
 
@@ -169,7 +221,7 @@ namespace c0de4un
 	 * @throws - can throw exception.
 	*/
 	void Sprite::Hide( GLRenderer *const renderSystem_ )
-	{// TODO Sprite::Hide
+	{
 
 		// Cancel
 		if ( !mVisible )
@@ -180,6 +232,18 @@ namespace c0de4un
 		logMsg += mName;
 		logMsg += "::Hide";
 		Log::printDebug( logMsg.c_str( ) );
+
+		// Lock
+		mLock.lock( );
+
+		// Remove Drawable
+		renderSystem_->removeDrawable( &mDrawable, mShaderProgram.getProgramObject( ), mGLTexture2D != nullptr ? mGLTexture2D->getTextureObject( ) : 0 );
+
+		// Set Visible flag
+		mVisible = false;
+
+		// Unlock
+		mLock.unlock( );
 
 	}
 

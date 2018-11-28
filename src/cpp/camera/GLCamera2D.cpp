@@ -6,9 +6,9 @@
 */
 
 // HEADER
-#ifndef __c0de4un_gl_camera_hpp__
-#include "GLCamera.hpp"
-#endif // !__c0de4un_gl_camera_hpp__
+#ifndef __c0de4un_gl_camera_2D_hpp__
+#include "GLCamera2D.hpp"
+#endif // !__c0de4un_gl_camera_2D_hpp__
 
 namespace c0de4un
 {
@@ -20,7 +20,7 @@ namespace c0de4un
 	// ===========================================================
 
 	/*
-	 * GLCamera constructor
+	 * GLCamera2D constructor
 	 *
 	 * @param pX - Viewport X (Left).
 	 * @param pY - Viewport Y (Bottom).
@@ -29,19 +29,19 @@ namespace c0de4un
 	 * @param zNear - Frustum Near-Plane.
 	 * @param zFar - Frustum Far-Plane.
 	*/
-	GLCamera::GLCamera( const float & pX, const float & pY, const float & pWidth, const float & pHeight, const float & zNear_, const float & zFar_ )
-		: frustumX( pX ), frustumY( pY ), frustumWidth( pWidth ), frustumHeight( pHeight ), zNear( zNear_ ), zFar( zFar_ ),
-		lock_( ),
-		viewProjection_( ),
-		position_( 0.0f, 0.0f, 1.0f ),
-		target_( 0.0f, 0.0f, 0.0f ),
-		up_( 0.0f, 1.0f, 0.0f )
-
+	GLCamera2D::GLCamera2D( const float & pX, const float & pY, const float & pWidth, const float & pHeight, const float & zNear_, const float & zFar_ )
+		: mutex_( ),
+		lock_( mutex_, std::defer_lock ),
+		position_( 0.0f, 0.0f, 0.0f ),
+		frustum_{ pX, pWidth, pY, pHeight, zNear_, zFar_ },
+		viewMat_( 1.0f ),
+		projectionMat_( 1.0f ),
+		updated_( false )
 	{
 	}
 
-	/* GLCamera destructor */
-	GLCamera::~GLCamera( )
+	/* GLCamera2D destructor */
+	GLCamera2D::~GLCamera2D( )
 	{
 	}
 

@@ -57,16 +57,16 @@ namespace c0de4un
 		static constexpr unsigned char TEXTURE_COORDS_VBO = 2;
 
 		/* Vertex Position Attribute Index (ID) */
-		GLuint vertexPosAttrIndex_;
+		GLint vertexPosAttrIndex_;
 
 		/* Vertex Texture Coordinates */
-		GLuint texCoordsAttrIndex_;
+		GLint texCoordsAttrIndex_;
 
 		/* Vertices Color */
-		GLuint colorAttrIndex_;
+		GLint colorAttrIndex_;
 
-		/* MVP (Model View Projection) Matrix Uniform (global) index */
-		GLuint mvpUniformIndex_;
+		/* MVP (Model View Projection) Matrix uniform index */
+		GLint mvpMatUniformLoc_;
 
 		/*
 		 * Vertex Buffer Objects
@@ -83,6 +83,35 @@ namespace c0de4un
 		 * Used to sort Drawable-Objects by 2D-Texture.
 		*/
 		std::map<const GLuint, std::vector<Drawable*>> textureObjects_;
+
+		/* BatchInfo default constructor */
+		BatchInfo( )
+			: vertexPosAttrIndex_( -1 ),
+			texCoordsAttrIndex_( -1 ),
+			colorAttrIndex_( -1 ),
+			mvpMatUniformLoc_( -1 ),
+			vboIDs_{ 0, 0, 0 },
+			vaoID_( 0 ),
+			textureObjects_( )
+		{
+		}
+
+		/* BatchInfo destructor */
+		~BatchInfo( )
+		{
+		}
+
+		/* @deleted BatchInfo const copy constructor */
+		BatchInfo( const BatchInfo & ) = delete;
+
+		/* @deleted BatchInfo copy assignment operator */
+		BatchInfo & operator=( const BatchInfo & ) = delete;
+
+		/* @deleted BatchInfo move constructor */
+		BatchInfo( BatchInfo && ) = delete;
+
+		/* @deleted BatchInfo move assignment operator */
+		BatchInfo & operator=( BatchInfo && ) = delete;
 
 	};
 

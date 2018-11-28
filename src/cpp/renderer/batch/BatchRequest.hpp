@@ -40,22 +40,51 @@ namespace c0de4un
 		GLuint shaderProgram_;
 
 		/* Vertex Position Attribute Index (ID) */
-		GLuint vertexPosAttrIndex_;
+		GLint vertexPosAttrIndex_;
 
 		/* Vertex Texture Coordinates */
-		GLuint texCoordsAttrIndex_;
+		GLint texCoordsAttrIndex_;
 
 		/* Vertices Color */
-		GLuint colorAttrIndex_;
+		GLint colorAttrIndex_;
 
 		/* OpenGL 2D Texture Object ID */
 		GLuint textureObject_;
 
 		/* Model View Projection (MVP) Uniform index */
-		GLuint mvpMatUniformIndex_;
+		GLint mvpMatUniformIndex_;
 
 		/* Drawable-Object */
 		Drawable * drawable_;
+
+		/* BatchRequest default constructor */
+		BatchRequest( )
+			: shaderProgram_( 0 ),
+			vertexPosAttrIndex_( -1 ),
+			texCoordsAttrIndex_( -1 ),
+			colorAttrIndex_( -1 ),
+			textureObject_( 0 ),
+			mvpMatUniformIndex_( -1 ),
+			drawable_( nullptr )
+		{
+		}
+
+		/* BatchRequest destructor */
+		~BatchRequest( )
+		{
+		}
+
+		/* @deleted BatchRequest const copy constructor */
+		BatchRequest( const BatchRequest & ) = delete;
+
+		/* @deleted BatchRequest copy assignment operator */
+		BatchRequest & operator=( const BatchRequest & ) = delete;
+
+		/* @deleted BatchRequest move constructor */
+		BatchRequest( BatchRequest && ) = delete;
+
+		/* @deleted BatchRequest move assignment operator */
+		BatchRequest & operator=( BatchRequest && ) = delete;
 
 	};
 

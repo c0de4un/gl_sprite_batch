@@ -39,6 +39,7 @@ namespace c0de4un
 	*/
 	GLShader::GLShader( const std::string & pName, const GLenum & shaderType_, const std::string *const sourceCode_, const std::string *const pFile )
 		: mType( shaderType_ ),
+		mShaderObject( 0 ),
 		mCode( sourceCode_ != nullptr ? new std::string( *sourceCode_ ) : nullptr ),
 		mFile( pFile != nullptr ? new std::string( *pFile ) : nullptr ),
 		mName( pName )

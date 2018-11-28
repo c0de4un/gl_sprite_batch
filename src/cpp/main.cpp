@@ -29,10 +29,15 @@
 #include "assets/shader/GLShaderProgram.hpp"
 #endif // !__c0de4un_gl_shader_program_hpp__
 
-// Include GLCamera
-#ifndef __c0de4un_gl_camera_hpp__
-#include "camera/GLCamera.hpp"
-#endif // !__c0de4un_gl_camera_hpp__
+// Include Sprite
+#ifndef __c0de4un_sprite_hpp__
+#include "objects/sprite/Sprite.hpp"
+#endif // !__c0de4un_sprite_hpp__
+
+// Include GLCamera2D
+#ifndef __c0de4un_gl_camera_2D_hpp__
+#include "camera/GLCamera2D.hpp"
+#endif // !__c0de4un_gl_camera_2D_hpp__
 
 /* Window & Viewport & Back Buffer Size */
 static const GLuint WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
@@ -43,7 +48,7 @@ static GLFWwindow *mGLFWWindow = nullptr;
 /*
  * 2D Camera
 */
-c0de4un::GLCamera * glCamera2D;
+c0de4un::GLCamera2D * glCamera2D;
 
 /* Vertex Shader */
 c0de4un::GLShader * vertexShader;
@@ -65,6 +70,7 @@ c0de4un::GLShaderProgram * shaderProgram;
 /*
  * Sprites
 */
+c0de4un::Sprite * sprite_;
 
 /*
  * GLRenderer - used for drawing (rendering) drawable-objects,
@@ -159,6 +165,10 @@ void mainLoop( )
 			// Clear Surface
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+			// Draw Sprite-Batch
+			if ( glRenderer )
+				glRenderer->Draw( glCamera2D );
+
 			// Swap Buffers
 			glfwSwapBuffers( mGLFWWindow );
 
@@ -198,6 +208,10 @@ void Unload( ) noexcept
 	// Guarded-Block
 	try
 	{
+
+		// Unload Sprite
+		if ( sprite_ )
+			sprite_->Hide( glRenderer );
 
 		// Unload Shader Program & Shaders
 		if ( shaderProgram )
@@ -239,6 +253,9 @@ static void Stop( ) noexcept
 	// Guarded-Block
 	try
 	{
+
+		// Close GLFW
+		glfwSetWindowShouldClose( mGLFWWindow, true );
 
 		// Release 2D-Camera
 		if ( glCamera2D )
@@ -288,6 +305,24 @@ static void Stop( ) noexcept
 
 		}
 
+		// Release GLRenderer
+		if ( glRenderer )
+		{
+
+			// Delete GLRenderer
+			delete glRenderer;
+
+			// Reset pointer-value
+			glRenderer = nullptr;
+
+		}
+
+		// Terminate GLFW
+		glfwTerminate( );
+
+		// Reset GLFWWindow pointer-value
+		mGLFWWindow = nullptr;
+
 	}
 	catch ( const std::exception & exception_ )
 	{
@@ -328,25 +363,48 @@ static const bool Load( ) noexcept
 
 		// Create 2D-Camera
 		if ( !glCamera2D )
-			glCamera2D = new c0de4un::GLCamera( 0, 0, 1280, 720, -1, 1 );
+			glCamera2D = new c0de4un::GLCamera2D( 0, 0, 1280, 720, 0, 1 );
 
 		// Create Vertex Shader
 		if ( vertexShader == nullptr )
 		{
 
+			///*
+			// * Vertex Shader Source-Code
+			// * No texture, no position & matrices.
+			// * 
+			// * @attribute 
+			//*/
+			//const std::string glslCode_(
+			//"#version 330 \n"
+			//"attribute vec4 a_Position; \n"
+			//"attribute vec4 a_Color; \n"
+			//"varying vec4 v_Color; \n"
+			//"void main() \n"
+			//"{ \n"
+			//"gl_Position = a_Position; \n"
+			//"v_Color = a_Color; \n"
+			//"} \n" );
+
 			/*
 			 * Vertex Shader Source-Code
-			 * No texture, no color, no position & matrices.
-			 * 
-			 * @attribute 
+			 * No texture
+			 *
+			 * @attribute a_Position - vertex position.
+			 * @attribute a_Color - primitive color.
+			 * @attribute a_MVP - Model View Projection Matrix.
 			*/
 			const std::string glslCode_(
-			"#version 300 \n"
-			"attribute vec4 a_Position; \n"
-			"void main() \n"
-			"{ \n"
-			"gl_Position = a_Position; \n"
-			"} \n" );
+				"#version 330 \n"
+				"attribute vec4 a_Position; \n"
+				"attribute vec4 a_Color; \n"
+				"uniform mat4 u_MVP; \n"
+				"varying vec4 v_Color; \n"
+				"void main() \n"
+				"{ \n"
+				"gl_Position = ( u_MVP * a_Position ) ; \n"
+				"v_Color = a_Color; \n"
+				"} \n" );
 
 			// Create Vertex Shader
 			vertexShader = new c0de4un::GLShader( "vertexShader", GL_VERTEX_SHADER, &glslCode_, nullptr );
@@ -371,18 +429,34 @@ static const bool Load( ) noexcept
 		if ( fragmentShader == nullptr )
 		{
 
+			///*
+			// * Fragment Shader Source-Code
+			// * No texture, no color, no position & matrices.
+			// *
+			//*/
+			//const std::string glslCode_(
+			//	"#version 330 \n"
+			//	"precision mediump float; \n"
+			//	"varying vec4 v_Color; \n"
+			//	"out vec4 fragColor; \n"
+			//	"void main() \n"
+			//	"{ \n"
+			//	"fragColor = v_Color; \n"
+			//	"} \n" );
+
 			/*
 			 * Fragment Shader Source-Code
-			 * No texture, no color, no position & matrices.
+			 * No texture
 			 *
 			*/
 			const std::string glslCode_(
-				"#version 300 \n"
+				"#version 330 \n"
 				"precision mediump float; \n"
+				"varying vec4 v_Color; \n"
 				"out vec4 fragColor; \n"
 				"void main() \n"
 				"{ \n"
-				"fragColor = vec4( 1.0f, 1.0f, 1.0f, 1.0f ); \n"
+				"fragColor = v_Color; \n"
 				"} \n" );
 
 			// Create Fragment Shader
@@ -406,7 +480,7 @@ static const bool Load( ) noexcept
 
 		// Create Shader Program
 		if ( shaderProgram == nullptr )
-			shaderProgram = new c0de4un::GLShaderProgram( "shaderProgram", *vertexShader, *fragmentShader );
+			shaderProgram = new c0de4un::GLShaderProgram( "shaderProgram", *vertexShader, *fragmentShader, "a_Position", "", "a_Color", "", "u_MVP" );
 
 		// Load Shader Program
 		if ( !shaderProgram->Load( ) )
@@ -421,6 +495,13 @@ static const bool Load( ) noexcept
 			return( false );
 
 		}
+
+		// Create Sprite
+		if ( !sprite_ )
+			sprite_ = new c0de4un::Sprite( "rectangle", *shaderProgram, nullptr );
+
+		// Show Sprite
+		sprite_->Show( glRenderer );
 
 	}
 	catch ( const std::exception & exception_ )
@@ -533,6 +614,8 @@ static const bool Initialize( ) noexcept
 		glClearColor( 0.0f, 0.6f, 0.8f, 1.0f );
 
 		// Create GLRenderer
+		if ( !glRenderer )
+			glRenderer = new c0de4un::GLRenderer( );
 
 	}
 	catch ( const std::exception & exception_ )

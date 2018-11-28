@@ -15,6 +15,11 @@
 #include "../../renderer/GLRenderer.hpp"
 #endif // !__c0de4un_gl_renderer_hpp__
 
+// Include PNGImage
+#ifndef __c0de4un_png_image_hpp__
+#include "../image/PNGImage.hpp"
+#endif // !__c0de4un_png_image_hpp__
+
 // Include Log
 #ifndef __c0de4un_log_hpp__
 #include "../../utils/log/Log.hpp"
@@ -98,7 +103,7 @@ namespace c0de4un
 
 		// Cancel
 		if ( mTextureObject > 0 )
-			return;
+			return( true );
 
 		// Log
 		std::string logMsg( "GLTexture2D#" );
@@ -106,7 +111,8 @@ namespace c0de4un
 		logMsg += "::Load";
 		Log::printDebug( logMsg.c_str( ) );
 
-		// 
+		// Return TRUE
+		return( true );
 
 	}
 
