@@ -47,6 +47,16 @@ namespace c0de4un
 		mImage( nullptr )
 	{
 
+#ifdef DEBUG // DEBUG
+		// Check Name
+		if ( mName.empty( ) )
+			throw std::exception( "GLTexture2D::constructor - Name is null" );
+
+		// Check Image file path
+		if ( pFile.empty( ) )
+			throw std::exception( "GLTexture2D::constructor - Path to the image is null" );
+#endif // DEBUG
+
 		// Log
 		std::string logMsg( "GLTexture2D#" );
 		logMsg += mName;
@@ -99,7 +109,7 @@ namespace c0de4un
 	 * @throws - can throw exception.
 	*/
 	const bool GLTexture2D::Load( )
-	{// TODO GLTexture2D::Load
+	{
 
 		// Cancel
 		if ( mTextureObject > 0 )
@@ -110,6 +120,63 @@ namespace c0de4un
 		logMsg += mName;
 		logMsg += "::Load";
 		Log::printDebug( logMsg.c_str( ) );
+
+		// Create PNGImage instance
+		if ( mImage == nullptr )
+			mImage = new PNGImage( mFile );
+
+		// Load PNG Image
+		if ( !mImage->Load( ) )
+		{
+
+			// Log
+			logMsg = "GLTexture2D#";
+			logMsg += mName;
+			logMsg += "::Load - failed to load PNG Image #";
+			logMsg += mFile;
+			Log::printDebug( logMsg.c_str( ) );
+
+			// Unload
+			Unload( );
+
+			// Cancel
+			return( false );
+
+		}
+
+		// Create 2D-Texture Object
+		glCreateTextures( GL_TEXTURE_2D, 1, &mTextureObject );
+
+		// Bind 2D-Texture Object
+		glBindTexture( GL_TEXTURE_2D, mTextureObject );
+
+		// Mark that Texture Image Data is Tightly Packed (1 byte stride)
+		glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+
+		// OpenGL Color Format
+		const GLenum & glColorForamt_ = mImage->mColorFormat;
+
+		// Upload Image bytes from Local Memory (App Space) to OpenGL Memory (GPU/VRAM)
+		glTexImage2D( GL_TEXTURE_2D, 0, glColorForamt_, mImage->mSize[0], mImage->mSize[1], 0, glColorForamt_, GL_UNSIGNED_BYTE, mImage->mBytes );
+
+		// Set Texture Min. Filter to Nearest, cause smoothing not required (zooming, etc)
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+
+		// Set Texture Mag. Filter to Nearest, cause smoothing not required (zooming, etc)
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+		// Set Texture S (U/X) Wrap-Method to Clamp to edge (repeat and others not required)
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER );
+
+		// Set Texture T (V/Y) Wrap-Method to Clamp to edge (repeat and others not required)
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER );
+
+		// Unbind Texture
+		glBindTexture( GL_TEXTURE_2D, 0 );
+
+		// Unload & release PNGImage
+		//delete mImage;
+		//mImage = nullptr;
 
 		// Return TRUE
 		return( true );
@@ -123,17 +190,31 @@ namespace c0de4un
 	 * @throws - can throw exception.
 	*/
 	void GLTexture2D::Unload( )
-	{// TODO GLTexture2D::Unload
-
-		// Cancel
-		if ( mTextureObject < 1 )
-			return;
+	{
 
 		// Log
 		std::string logMsg( "GLTexture2D#" );
 		logMsg += mName;
 		logMsg += "::Unload";
 		Log::printDebug( logMsg.c_str( ) );
+
+		// Delete OpenGL 2D-Texture Object
+		glDeleteTextures( 1, &mTextureObject );
+
+		// Reset 2D-Texture Object ID
+		mTextureObject = 0;
+
+		// Release PNGImage
+		if ( mImage != nullptr )
+		{
+
+			// Delete PNGImage instance
+			delete mImage;
+
+			// Reset pointer-value
+			mImage = nullptr;
+
+		}
 
 	}
 

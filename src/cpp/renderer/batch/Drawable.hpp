@@ -67,6 +67,9 @@ namespace c0de4un
 		*/
 		GLuint shaderProgram_;
 
+		/* 2D-Texture #0 Sampler Location/Index */
+		GLint texSamplerLoc_;
+
 		/*
 		 * Object Position component
 		*/
@@ -90,37 +93,11 @@ namespace c0de4un
 		std::unique_lock<std::mutex> * lock_;
 
 		/*
-		 * Translation Matrix.
-		 * Used to avoid unnecessary re-calculations.
-		*/
-		glm::mat4 translationMat_;
-
-		/*
-		 * Scale Matrix.
-		 * Used to avoid unnecessary re-calculations.
-		*/
-		glm::mat4 scaleMat_;
-
-		/*
-		 * Model Matrix.
-		 * Used to avoid recalculating it every time View and/or Projection changed.
-		*/
-		glm::mat4 modelMat_;
-
-		/*
 		 * MVP (Model View Projection) Matrix [Projection * View * Model(Translation * Rotation * Scale)]
 		 * Used to avoid calculating MVP matrix each frame if not required.
 		 * Depends on Camera used for render (draw).
 		*/
 		glm::mat4 mvpMat_;
-
-		/*
-		 * Calculated orientation (rotation) quaternion.
-		 *
-		 * Allows to avoid unnecessary recalculation on each frame.
-		 * Also provides faster rotation changes apply then matrix (matrix * vector).
-		*/
-		glm::quat orientationQuat_;
 
 		/*
 		 * Color values in RGBA format.
@@ -136,11 +113,8 @@ namespace c0de4un
 			rotation_( nullptr ),
 			scale_( nullptr ),
 			lock_( nullptr ),
-			translationMat_( 1.0f ),
-			scaleMat_( 1.0f ),
-			orientationQuat_( ),
-			modelMat_( ),
 			mvpMat_( ),
+			texSamplerLoc_( -1 ),
 			color_{ 1.0f, 1.0f, 1.0f, 1.0f }
 		{
 		}

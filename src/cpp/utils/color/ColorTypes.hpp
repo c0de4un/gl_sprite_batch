@@ -29,25 +29,16 @@ namespace c0de4un
 		// ===========================================================
 
 		/* RGBA 8 */
-		static constexpr unsigned char RGBA_8 = 0;
+		static constexpr unsigned char RGBA = 0;
 
 		/* RGB 8 */
-		static constexpr unsigned char RGB_8 = 1;
-
-		/* ARGB 8 */
-		static constexpr unsigned char ARGBA_8 = 2;
-
-		/* RGB 16 */
-		static constexpr unsigned char RGB_16 = 3;
-
-		/* RGBA 16 */
-		static constexpr unsigned char RGBA_16 = 4;
+		static constexpr unsigned char RGB = 1;
 
 		/* GREY */
-		static constexpr unsigned char GREY = 5;
+		static constexpr unsigned char LUMINANCE = 5;
 
 		/* GREY ALPHA */
-		static constexpr unsigned char GREY_ALPHA = 6;
+		static constexpr unsigned char LUMINANCE_ALPHA = 6;
 
 		// -------------------------------------------------------- \\
 

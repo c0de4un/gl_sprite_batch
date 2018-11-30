@@ -60,7 +60,7 @@ namespace c0de4un
 		-1.0f, 1.0f, 0.0f, 1.0f
 	},
 		mVerticesIndices{ 0, 1, 2, 2, 3, 0 },
-		mVerticesTextureCoords{ 0.0f, 0.0f, 1.0f, 1.0f }
+		mVerticesTextureCoords{ 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f }
 	{
 
 		// Log
@@ -146,7 +146,7 @@ namespace c0de4un
 			glBindBuffer( GL_ARRAY_BUFFER, batchInfo.vboIDs_[BatchInfo::TEXTURE_COORDS_VBO] );
 
 			// Upload Vertices 2D-Texture Coordinates data to the OpenGL Buffer Object (GPU)
-			glBufferData( GL_ARRAY_BUFFER, ( TEXTURE_COORDS_COUNT * TEXTURE_COORD_SIZE ) * sizeof( GLfloat ), &mVerticesTextureCoords[0], GL_STATIC_DRAW ); // STATIC_DRAW, because buffer data not changed.
+			glBufferData( GL_ARRAY_BUFFER, ( TEXTURE_COORD_SIZE * VERTICES_COUNT ) * sizeof( GLfloat ), &mVerticesTextureCoords[0], GL_STATIC_DRAW ); // STATIC_DRAW, because buffer data not changed.
 
 			// Unbind 2D-Texture Coordinates Buffer Object
 			glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -568,7 +568,7 @@ namespace c0de4un
 			glm::mat4 modelMat_( 1.0f );
 
 			// Translate Model Matrix
-			glm::translate( modelMat_, pDrawable->position_->vec3_ );
+			modelMat_ = glm::translate( modelMat_, pDrawable->position_->vec3_ );
 
 			// Rotate Model Matrix
 			modelMat_ = glm::rotate( modelMat_, glm::radians( pDrawable->rotation_->vec3_.x ), glm::vec3( 1.0f, 0.0f, 0.0f ) ); // X
@@ -680,16 +680,27 @@ namespace c0de4un
 			while ( texturesIterator_ != texturesEnd_ )
 			{
 
-				// Bind Texture
-				if ( texturesIterator_->first > 0 )
-					glBindTexture( GL_TEXTURE_2D, texturesIterator_->first );
-
 				// Get Drawable-Objects vector
 				std::vector<Drawable*> & drawableObjects_ = texturesIterator_->second;
 
 				// Drawable-Object
 				for ( Drawable *const drawable_ : drawableObjects_ )
 				{
+
+					// Bind Texture
+					if ( texturesIterator_->first > 0 )
+					{
+
+						// Make 2D Texture Unit #0 Active
+						glActiveTexture( GL_TEXTURE0 );
+
+						// Bind 2D-Texture
+						glBindTexture( GL_TEXTURE_2D, texturesIterator_->first );
+
+						// Set Shader Uniform Texture Sampler 2D to Texture Unit #0
+						glUniform1i( drawable_->texSamplerLoc_, 0 );
+
+					}
 
 					// Lock Drawable
 					drawable_->lock_->lock( );

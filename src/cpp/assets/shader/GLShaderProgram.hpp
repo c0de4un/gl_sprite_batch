@@ -53,14 +53,14 @@ namespace c0de4un
 		 * @param vertexPosAttrName_ - Vertex Position attribute Name.
 		 * @param vertexTexCoordsAttrName_ - Vertex Texture Coordinates attribute Name.
 		 * @param vertexColorAttrName_ - Vertex Color attribute Name.
-		 * @param texUniformName_ - Texture Uniform Name.
+		 * @param texSamplerName_ - Texture Sampler Name.
 		 * @param mvpUniformName_ - Model View Projection Matrix Uniform name.
 		*/
 		explicit GLShaderProgram( const std::string & pName, GLShader & vertexShader_, GLShader & fragmentShader_, 
 			const std::string & vertexPosAttrName_, 
 			const std::string & vertexTexCoordsAttrName_, 
 			const std::string & vertexColorAttrName_, 
-			const std::string & texUniformName_, 
+			const std::string & texSamplerName_,
 			const std::string & mvpUniformName_ );
 
 		/* GLShaderProgram destructor */
@@ -85,8 +85,8 @@ namespace c0de4un
 		/* Returns Vertex Color attribute index for OpenGL */
 		const GLint & getColorAttrIndex( ) const noexcept;
 
-		/* Returns Texture Uniform (public, global) index for OpenGL */
-		const GLint & getTexUniformIndex( ) const noexcept;
+		/* Returns OpenGL (GLSL) Texture Sampler #0 location/index */
+		const GLint & getTextureSamplerLocation( ) const noexcept;
 
 		/* Returns Model View Projection (MVP) Matrix Uniform location/index */
 		const GLint & getMVPUniform( ) const noexcept;
@@ -131,8 +131,8 @@ namespace c0de4un
 		/* Vertex Color attribute Name */
 		const std::string mVertexColorAttrName;
 
-		/* Vertex Texture Uniform Name */
-		const std::string mTexUniformName;
+		/* Vertex Texture Sampler Name */
+		const std::string mTexSamplerName;
 
 		/* Model View Projection Matrix Uniform Name */
 		const std::string mMVPUniformName;
@@ -159,8 +159,8 @@ namespace c0de4un
 		/* Vertex Texture Coordinates Attribute Index */
 		GLint mVertexTexCoordsAttrIndex;
 
-		/* Texture Uniform Index for OpenGL */
-		GLint mTexUniformIndex;
+		/* Texture Sampler #0 Location/Index for OpenGL */
+		GLint mTexSamplerLoc;
 
 		/* MVP (Model View Projection) Matrix attribute Index for OpenGL */
 		GLint mMVPMatUniformLoc;

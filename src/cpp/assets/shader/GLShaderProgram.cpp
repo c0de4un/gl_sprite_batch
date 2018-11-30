@@ -43,14 +43,14 @@ namespace c0de4un
 	 * @param vertexPosAttrName_ - Vertex Position attribute Name.
 	 * @param vertexTexCoordsAttrName_ - Vertex Texture Coordinates attribute Name.
 	 * @param vertexColorAttrName_ - Vertex Color attribute Name.
-	 * @param texUniformName_ - Texture Uniform Name.
+	 * @param texSamplerName_ - Texture Sampler Name.
 	 * @param mvpUniformName_ - Model View Projection Matrix Uniform name.
 	*/
 	GLShaderProgram::GLShaderProgram( const std::string & pName, GLShader & vertexShader_, GLShader & fragmentShader_,
 		const std::string & vertexPosAttrName_,
 		const std::string & vertexTexCoordsAttrName_,
 		const std::string & vertexColorAttrName_,
-		const std::string & texUniformName_, 
+		const std::string & texSamplerName_, 
 		const std::string & mvpUniformName_ )
 		: mName( pName ),
 		mVertexShader( vertexShader_ ),
@@ -59,12 +59,12 @@ namespace c0de4un
 		mVertexPosAttrName( vertexPosAttrName_ ),
 		mVertexTexCoordsAttrName( vertexTexCoordsAttrName_ ),
 		mVertexColorAttrName( vertexColorAttrName_ ),
-		mTexUniformName( texUniformName_ ),
+		mTexSamplerName( texSamplerName_ ),
 		mMVPUniformName( mvpUniformName_ ),
 		mVertexPosAttrIndex( -1 ),
 		mVertexColorAttrIndex( -1 ),
 		mVertexTexCoordsAttrIndex( -1 ),
-		mTexUniformIndex( -1 )
+		mTexSamplerLoc( -1 )
 	{
 
 		// Log
@@ -111,9 +111,9 @@ namespace c0de4un
 	const GLint & GLShaderProgram::getColorAttrIndex( ) const noexcept
 	{ return( mVertexColorAttrIndex ); }
 
-	/* Returns Texture Uniform (public, global) index for OpenGL */
-	const GLint & GLShaderProgram::getTexUniformIndex( ) const noexcept
-	{ return( mTexUniformIndex ); }
+	/* Returns OpenGL (GLSL) Texture Sampler #0 location/index */
+	const GLint & GLShaderProgram::getTextureSamplerLocation( ) const noexcept
+	{ return( mTexSamplerLoc ); }
 
 	/* Returns Model View Projection (MVP) Matrix attribute index */
 	const GLint & GLShaderProgram::getMVPUniform( ) const noexcept
@@ -236,42 +236,48 @@ namespace c0de4un
 
 		}
 
-		// Search Vertex Color attribute index
-		mVertexColorAttrIndex = glGetAttribLocation( mProgramObject, mVertexColorAttrName.c_str( ) );
-
-		// Check if Attribute Location Found
-		if ( mVertexColorAttrIndex < 0 )
-		{
-			// Log Message
-			std::string logMsg( "GLShaderProgram#" );
-			logMsg += mName;
-
-			// Append Details
-			logMsg += "::Load - Vertex Color Attribute Location not found !";
-
-			// Print Message to Log
-			Log::printError( logMsg.c_str( ) );
-
-			// Return FALSE
-			return( false );
-		}
-
-		// Texture Uniform #0
-		if ( mVertexTexCoordsAttrIndex > 0 )
+		// Color Attribute
+		if ( !mVertexColorAttrName.empty( ) )
 		{
 
-			// Search Texture Uniform index
-			mTexUniformIndex = glGetAttribLocation( mProgramObject, mTexUniformName.c_str( ) );
+			// Search Vertex Color attribute index
+			mVertexColorAttrIndex = glGetAttribLocation( mProgramObject, mVertexColorAttrName.c_str( ) );
 
 			// Check if Attribute Location Found
-			if ( mTexUniformIndex < 0 )
+			if ( mVertexColorAttrIndex < 0 )
 			{
 				// Log Message
 				std::string logMsg( "GLShaderProgram#" );
 				logMsg += mName;
 
 				// Append Details
-				logMsg += "::Load - Texture Uniform #0 Location not found !";
+				logMsg += "::Load - Vertex Color Attribute Location not found !";
+
+				// Print Message to Log
+				Log::printError( logMsg.c_str( ) );
+
+				// Return FALSE
+				return( false );
+			}
+
+		}
+
+		// Texture Sampler #0
+		if ( mVertexTexCoordsAttrIndex > 0 )
+		{
+
+			// Search Texture Sampler #0 location/index
+			mTexSamplerLoc = glGetUniformLocation( mProgramObject, mTexSamplerName.c_str( ) );
+
+			// Check if Attribute Location Found
+			if ( mTexSamplerLoc < 0 )
+			{
+				// Log Message
+				std::string logMsg( "GLShaderProgram#" );
+				logMsg += mName;
+
+				// Append Details
+				logMsg += "::Load - Texture Sampler #0 Location not found !";
 
 				// Print Message to Log
 				Log::printError( logMsg.c_str( ) );
@@ -342,7 +348,7 @@ namespace c0de4un
 		mVertexColorAttrIndex = -1;
 
 		// Reset Texture Uniform #0 Index
-		mTexUniformIndex = -1;
+		mTexSamplerLoc = -1;
 
 		// Reset Shader Program Object ID
 		mProgramObject = 0;

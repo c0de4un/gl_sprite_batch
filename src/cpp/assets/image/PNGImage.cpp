@@ -10,6 +10,21 @@
 #include "PNGImage.hpp"
 #endif // !__c0de4un_png_image_hpp__
 
+// Include PNGLoader
+#ifndef __c0de4un_png_loader_hpp__
+#include "PNGLoader.hpp"
+#endif // !__c0de4un_png_loader_hpp__
+
+// Include InputFile
+#ifndef __c0de4un_input_file_hpp__
+#include "../../utils/io/InputFile.hpp"
+#endif // !__c0de4un_input_file_hpp__
+
+// Include Log
+#ifndef __c0de4un_log_hpp__
+#include "../../utils/log/Log.hpp"
+#endif // !__c0de4un_log_hpp__
+
 namespace c0de4un
 {
 
@@ -23,17 +38,34 @@ namespace c0de4un
 	 * PNGImage constructor
 	 *
 	 * @param pFile - path to the PNG-image.
-	 * @param colorType_ - Color-Type, @see ColorTypes.hpp.
 	*/
-	PNGImage::PNGImage( const std::string & pFile, const unsigned char colorType_ )
+	PNGImage::PNGImage( const std::string & pFile )
 		: mFile( pFile ),
-		mColorType( colorType_ )
+		mColorFormat( GL_RGBA ),
+		mSize{ 0, 0 },
+		mBytes( nullptr ),
+		mDataLength( 0 ),
+		mBitDepth( 0 ),
+		mChannelsCount( 0 )
 	{
+
+		// Log
+		std::string logMsg( "PNGImage#" );
+		logMsg += mFile;
+		logMsg += "::constructor";
+		Log::printDebug( logMsg.c_str( ) );
+
 	}
 
 	/* PNGImage destructor */
 	PNGImage::~PNGImage( )
 	{
+
+		// Log
+		std::string logMsg( "PNGImage#" );
+		logMsg += mFile;
+		logMsg += "::destructor";
+		Log::printDebug( logMsg.c_str( ) );
 
 		// Release PNG bytes
 		if ( mBytes != nullptr )
@@ -84,6 +116,36 @@ namespace c0de4un
 	*/
 	const bool PNGImage::Load( )
 	{
+
+		// Cancel
+		if ( mBytes != nullptr )
+			return( true );
+
+		// Log
+		std::string logMsg( "PNGImage#" );
+		logMsg += mFile;
+		logMsg += "::Load";
+		Log::printDebug( logMsg.c_str( ) );
+
+		// InputFile
+		InputFile inputFile;
+
+		// Load PNG-data
+		if ( !PNGLoader::loadImage( this, &inputFile ) )
+		{
+
+			// Log
+			logMsg = "PNGImage::Load - failed to load";
+			Log::printWarning( logMsg.c_str( ) );
+
+			// Return FALSE
+			return( false );
+
+		}
+
+		// Return TRUE
+		return( true );
+
 	}
 
 	/*
@@ -94,6 +156,25 @@ namespace c0de4un
 	*/
 	void PNGImage::Unload( )
 	{
+
+		// Log
+		std::string logMsg( "PNGImage#" );
+		logMsg += mFile;
+		logMsg += "::Unload";
+		Log::printDebug( logMsg.c_str( ) );
+
+		// Release PNG bytes
+		if ( mBytes != nullptr )
+		{
+
+			// Delete bytes-array
+			delete[] mBytes;
+
+			// Reset pointer-value
+			mBytes = nullptr;
+
+		}
+
 	}
 
 	// -------------------------------------------------------- \\

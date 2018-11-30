@@ -13,10 +13,8 @@
 #include "../../cfg/string.hpp"
 #endif // !__c0de4un_string_hpp__
 
-// Include ColorTypes
-#ifndef __c0de4un_color_types_hpp__
-#include "../../utils/color/ColorTypes.hpp"
-#endif // !__c0de4un_color_types_hpp__
+// Include OpenGL
+#include "../../cfg/opengl.hpp"
 
 // PNGImage declared
 #define __c0de4un_png_image_decl__
@@ -40,8 +38,30 @@ namespace c0de4un
 		// Constants
 		// ===========================================================
 
-		/* Color Type, @see ColorTypes.hpp */
-		const unsigned char mColorType;
+		/* Path to the PNG Image */
+		const std::string mFile;
+
+		// ===========================================================
+		// Fields
+		// ===========================================================
+
+		/* Width & Height */
+		unsigned int mSize[2];
+
+		/* Image RAW Data (Bytes) */
+		unsigned char * mBytes;
+
+		/* Data Length in bytes */
+		unsigned int mDataLength;
+
+		/* Color Format */
+		GLenum mColorFormat;
+
+		/* Bit depth */
+		unsigned char mBitDepth;
+
+		/* Channels count */
+		unsigned char mChannelsCount;
 
 		// ===========================================================
 		// Constructor & destructor
@@ -51,9 +71,8 @@ namespace c0de4un
 		 * PNGImage constructor
 		 *
 		 * @param pFile - path to the PNG-image.
-		 * @param colorType_ - Color-Type, @see ColorTypes.hpp.
 		*/
-		explicit PNGImage( const std::string & pFile, const unsigned char colorType_ );
+		explicit PNGImage( const std::string & pFile );
 
 		/* PNGImage destructor */
 		~PNGImage( );
@@ -104,23 +123,6 @@ namespace c0de4un
 	private:
 
 		// -------------------------------------------------------- \\
-
-		// ===========================================================
-		// Constants
-		// ===========================================================
-
-		/* Path to the PNG Image */
-		const std::string mFile;
-
-		// ===========================================================
-		// Fields
-		// ===========================================================
-
-		/* Image RAW Data (Bytes) */
-		unsigned char * mBytes;
-
-		/* Data Length in bytes */
-		unsigned int mDataLength;
 
 		// ===========================================================
 		// Deleted

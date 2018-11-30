@@ -9,6 +9,11 @@
 #include <iostream> // cout, cin, cin.get
 #include <cstdlib> // std
 
+// Include opengl
+#ifndef __c0de4un_opengl_hpp__
+#include "cfg/opengl.hpp"
+#endif // !__c0de4un_opengl_hpp__
+
 // Include Log
 #ifndef __c0de4un_log_hpp__
 #include "utils/log/Log.hpp"
@@ -39,6 +44,16 @@
 #include "camera/GLCamera2D.hpp"
 #endif // !__c0de4un_gl_camera_2D_hpp__
 
+// Include GLTexture2D
+#ifndef __c0de4un_gl_texture_2D_hpp__
+#include "assets/texture/GLTexture2D.hpp"
+#endif // !__c0de4un_gl_texture_2D_hpp__
+
+// Include Random
+#ifndef __c0de4un_random_hpp__
+#include "utils/random/Random.hpp"
+#endif // !__c0de4un_random_hpp__
+
 /* Window & Viewport & Back Buffer Size */
 static const GLuint WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
 
@@ -66,6 +81,7 @@ c0de4un::GLShaderProgram * shaderProgram;
 /*
  * Texture 2D
 */
+c0de4un::GLTexture2D * texture2D;
 
 /*
  * Sprites
@@ -79,14 +95,27 @@ c0de4un::Sprite * sprite_;
 static c0de4un::GLRenderer * glRenderer( nullptr );
 
 /* GLFW Errors Callback */
-static void glfwErrorCallback( int errorCode, const char* errorDescription ) noexcept
-{// TODO glfwErrorCallback
+void glfwErrorCallback( int errorCode, const char* errorDescription ) noexcept
+{
+
+	// ERROR--message
+	std::string errMsg_( errorDescription );
+
+	// Cancel
+	if ( errMsg_.length( ) < 3 )
+		return;
+
+	// Log
+	errMsg_ = "main::glfwErrorCallback - ERROR: ";
+	errMsg_ += errorDescription;
+	c0de4un::Log::printError( errMsg_.c_str( ) );
 
 	// Guarded-Block
 	try
 	{
 
-		// 
+		// Stop
+		glfwSetWindowShouldClose( mGLFWWindow, true );
 
 	}
 	catch ( const std::exception & exception_ )
@@ -111,21 +140,34 @@ static void glfwErrorCallback( int errorCode, const char* errorDescription ) noe
 }
 
 /* GLFW Key-Input Callback */
-static void glfwKeyInputCallback( GLFWwindow* const pWindow, const int pKey, const int scanCode, const int pAction, const int pMode ) noexcept
-{// TODO glfwKeyInputCallback
+void glfwKeyInputCallback( GLFWwindow* const pWindow, const int pKey, const int scanCode, const int pAction, const int pMode ) noexcept
+{
+
+	// Log
+	std::string logMsg( "main::glfwKeyInputCallback - KEY=" );
+	logMsg += std::to_string( pKey );
+	logMsg += ", scan_code=";
+	logMsg += std::to_string( scanCode );
+	logMsg += ", action=";
+	logMsg += std::to_string( pAction );
+	logMsg += ", mode=";
+	logMsg += pMode;
+	c0de4un::Log::printDebug( logMsg.c_str( ) );
 
 	// Guarded-Block
 	try
 	{
 
-		// 
+		// ESC
+		if ( pKey == GLFW_KEY_ESCAPE && pAction == 1 )
+			glfwSetWindowShouldClose( mGLFWWindow, true );
 
 	}
 	catch ( const std::exception & exception_ )
 	{
 
 		// Log-message
-		std::string logMsg( "main::glfwKeyInputCallback - ERROR: " );
+		logMsg = "main::glfwKeyInputCallback - ERROR: ";
 		logMsg += exception_.what( );
 
 		// Print to the Log
@@ -143,60 +185,6 @@ static void glfwKeyInputCallback( GLFWwindow* const pWindow, const int pKey, con
 }
 
 /*
- * Main-Loop.
-*/
-void mainLoop( )
-{// TODO main::mainLoop
-
-	// Print to the Log
-	c0de4un::Log::printInfo( "main::mainLoop" );
-
-	// Guarded-Block
-	try
-	{
-
-		// Main-Loop
-		while ( !glfwWindowShouldClose( mGLFWWindow ) )
-		{
-
-			// Poll Events (Input Key, Mouse etc)
-			glfwPollEvents( );
-
-			// Clear Surface
-			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-			// Draw Sprite-Batch
-			if ( glRenderer )
-				glRenderer->Draw( glCamera2D );
-
-			// Swap Buffers
-			glfwSwapBuffers( mGLFWWindow );
-
-		}
-
-	}
-	catch ( const std::exception & exception_ )
-	{
-
-		// Log-message
-		std::string logMsg( "main::mainLoop - ERROR: " );
-		logMsg += exception_.what( );
-
-		// Print to the Log
-		c0de4un::Log::printError( logMsg.c_str( ) );
-
-	}
-	catch ( ... )
-	{
-
-		// Print to the Log
-		c0de4un::Log::printError( "main::mainLoop - unknown error !" );
-
-	}
-
-}
-
-/*
  * Unload resources (textures, vertices, buffers, etc).
 */
 void Unload( ) noexcept
@@ -208,6 +196,10 @@ void Unload( ) noexcept
 	// Guarded-Block
 	try
 	{
+
+		// Unload 2D-Texture
+		if ( texture2D != nullptr )
+			texture2D->Unload( );
 
 		// Unload Sprite
 		if ( sprite_ )
@@ -244,7 +236,7 @@ void Unload( ) noexcept
  *
  * @thread_safety - not thread-safe, can be called from any thread.
 */
-static void Stop( ) noexcept
+void Stop( ) noexcept
 {// TODO main::Stop
 
 	// Print to the Log
@@ -266,6 +258,18 @@ static void Stop( ) noexcept
 
 			// Reset pointer-value
 			glCamera2D = nullptr;
+
+		}
+
+		// Release 2D-Texture
+		if ( texture2D != nullptr )
+		{
+
+			// Delete 2D-Texture instance
+			delete texture2D;
+
+			// Reset pointer-value
+			texture2D = nullptr;
 
 		}
 
@@ -346,12 +350,66 @@ static void Stop( ) noexcept
 }
 
 /*
+ * Main-Loop
+*/
+void mainLoop( )
+{
+
+	// Print to the Log
+	c0de4un::Log::printInfo( "main::mainLoop" );
+
+	// Guarded-Block
+	try
+	{
+
+		// Main-Loop
+		while ( !glfwWindowShouldClose( mGLFWWindow ) )
+		{
+
+			// Poll Events (Input Key, Mouse etc)
+			glfwPollEvents( );
+
+			// Clear Surface
+			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+			// Draw Sprite-Batch
+			if ( glRenderer )
+				glRenderer->Draw( glCamera2D );
+
+			// Swap Buffers
+			glfwSwapBuffers( mGLFWWindow );
+
+		}
+
+	}
+	catch ( const std::exception & exception_ )
+	{
+
+		// Log-message
+		std::string logMsg( "main::mainLoop - ERROR: " );
+		logMsg += exception_.what( );
+
+		// Print to the Log
+		c0de4un::Log::printError( logMsg.c_str( ) );
+
+	}
+	catch ( ... )
+	{
+
+		// Print to the Log
+		c0de4un::Log::printError( "main::mainLoop - unknown error !" );
+
+	}
+
+}
+
+/*
  * Loads assets & objects, prepares data.
  *
  * @thread_safety - main (system, ui) thread-only.
  * @return - 'true' if OK.
 */
-static const bool Load( ) noexcept
+const bool Load( ) noexcept
 {// TODO main::Load
 
 	// Print to the Log
@@ -396,14 +454,14 @@ static const bool Load( ) noexcept
 			*/
 			const std::string glslCode_(
 				"#version 330 \n"
-				"attribute vec4 a_Position; \n"
-				"attribute vec4 a_Color; \n"
+				"in vec4 a_Position; \n"
+				"in vec2 a_TexCoord; \n"
 				"uniform mat4 u_MVP; \n"
-				"varying vec4 v_Color; \n"
+				"out vec2 v_TexCoord; \n"
 				"void main() \n"
 				"{ \n"
-				"gl_Position = ( u_MVP * a_Position ) ; \n"
-				"v_Color = a_Color; \n"
+				"gl_Position = ( u_MVP * a_Position ); \n"
+				"v_TexCoord = a_TexCoord; \n"
 				"} \n" );
 
 			// Create Vertex Shader
@@ -452,11 +510,12 @@ static const bool Load( ) noexcept
 			const std::string glslCode_(
 				"#version 330 \n"
 				"precision mediump float; \n"
-				"varying vec4 v_Color; \n"
+				"in vec2 v_TexCoord; \n"
 				"out vec4 fragColor; \n"
+				"uniform sampler2D s_texture; \n"
 				"void main() \n"
 				"{ \n"
-				"fragColor = v_Color; \n"
+				"fragColor = texture(s_texture, v_TexCoord); \n"
 				"} \n" );
 
 			// Create Fragment Shader
@@ -480,7 +539,7 @@ static const bool Load( ) noexcept
 
 		// Create Shader Program
 		if ( shaderProgram == nullptr )
-			shaderProgram = new c0de4un::GLShaderProgram( "shaderProgram", *vertexShader, *fragmentShader, "a_Position", "", "a_Color", "", "u_MVP" );
+			shaderProgram = new c0de4un::GLShaderProgram( "shaderProgram", *vertexShader, *fragmentShader, "a_Position", "a_TexCoord", "", "s_texture", "u_MVP" );
 
 		// Load Shader Program
 		if ( !shaderProgram->Load( ) )
@@ -496,10 +555,30 @@ static const bool Load( ) noexcept
 
 		}
 
+		// Create 2D-Texture
+		if ( texture2D == nullptr )
+			texture2D = new c0de4un::GLTexture2D( "smile", "../../../assets/smiley_PNG188.png" );
+
+		// Load 2D-Texture
+		if ( !texture2D->Load( ) )
+		{
+
+			// Print to the Log
+			std::string logMsg( "main::Load - failed to load 2D Texture#" );
+			logMsg += texture2D->mName;
+			c0de4un::Log::printWarning( logMsg.c_str( ) );
+
+			// Cancel
+			return( false );
+
+		}
+
 		// Create Sprite
 		if ( !sprite_ )
-			sprite_ = new c0de4un::Sprite( "rectangle", *shaderProgram, nullptr );
+			sprite_ = new c0de4un::Sprite( "rectangle", *shaderProgram, texture2D );
 
+		sprite_->mScale.vec3_ = glm::vec3( 64.0f, 64.0f, 0.0f );
+		sprite_->mPosition.vec3_ = glm::vec3( 256.0f, 256.0f, 0.0f );
 		// Show Sprite
 		sprite_->Show( glRenderer );
 
@@ -540,7 +619,7 @@ static const bool Load( ) noexcept
  * @thread_safety - main (system, ui) thread-only.
  * @return - 'true' if OK.
 */
-static const bool Initialize( ) noexcept
+const bool Initialize( ) noexcept
 {// TODO main::Initialize
 
 	// Print to the Log

@@ -154,6 +154,7 @@ namespace c0de4un
 
 		// Set OpenGL Texture Object ID
 		mDrawable.textureObject_ = mGLTexture2D != nullptr ? mGLTexture2D->getTextureObject( ) : 0;
+		mDrawable.texSamplerLoc_ = mDrawable.textureObject_ > 0 ? mShaderProgram.getTextureSamplerLocation( ) : -1;
 
 		// Set OpenGL Shader Program ID
 		mDrawable.shaderProgram_ = mShaderProgram.getProgramObject( );
@@ -181,6 +182,9 @@ namespace c0de4un
 
 		// Set Shader Program Object
 		batchRequest_.shaderProgram_ = mDrawable.shaderProgram_;
+
+		// Set Texture Object ID
+		batchRequest_.textureObject_ = mDrawable.textureObject_;
 
 		// Set Vertex Position attribute location/index
 		batchRequest_.vertexPosAttrIndex_ = mShaderProgram.getVertexPosAttrIndex( );
