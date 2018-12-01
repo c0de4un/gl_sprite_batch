@@ -640,6 +640,9 @@ namespace c0de4un
 		// Enable Blending
 		glEnable( GL_BLEND );
 
+		// Set Blending Function
+		glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
 		// Shader Programs
 		while ( programsIterator_ != programsEnd_ )
 		{

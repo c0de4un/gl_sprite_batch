@@ -60,7 +60,8 @@ namespace c0de4un
 		mLock( mMutex, std::defer_lock ),
 		mPosition { false, glm::vec3( 0.0f, 0.0f, 0.0f ), &mLock },
 		mRotation { false, glm::vec3( 0.0f, 0.0f, 0.0f ), &mLock },
-		mScale { false, glm::vec3( 100.0f, 100.0f, 0.0f ), &mLock }
+		mScale { false, glm::vec3( 100.0f, 100.0f, 0.0f ), &mLock },
+		mVelocity{ false, glm::vec3( 0.0f, 0.0f, 0.0f ), &mLock }
 	{
 
 		// Log

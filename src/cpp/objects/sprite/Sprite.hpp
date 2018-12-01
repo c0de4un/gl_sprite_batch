@@ -56,6 +56,11 @@ namespace c0de4un { class GLRenderer; }
 #include "../../components/Scale.hpp"
 #endif // !__c0de4un_scale_hpp__
 
+// Include Velocity
+#ifndef __c0de4un_velocity_hpp__
+#include "../../components/Velocity.hpp"
+#endif // !__c0de4un_velocity_hpp__
+
 // Sprite declared
 #define __c0de4un_sprite_decl__
 
@@ -84,17 +89,11 @@ namespace c0de4un
 		/* GLTexture */
 		GLTexture2D *const mGLTexture2D;
 
-		/* Drawable */
-		Drawable mDrawable;
-
 		/* Visibility flag */
 		bool mVisible;
 
 		/* Mutex */
 		std::mutex mMutex;
-
-		/* Thread-Lock */
-		std::unique_lock<std::mutex> mLock;
 
 		// ===========================================================
 		// Deleted
@@ -122,6 +121,9 @@ namespace c0de4un
 		// Fields
 		// ===========================================================
 
+		/* Drawable */
+		Drawable mDrawable;
+
 		/* Position component. */
 		Position mPosition;
 
@@ -130,6 +132,12 @@ namespace c0de4un
 
 		/* Scale component */
 		Scale mScale;
+
+		/* Velocity */
+		Velocity mVelocity;
+
+		/* Thread-Lock */
+		std::unique_lock<std::mutex> mLock;
 
 		// ===========================================================
 		// Constructor & destructor

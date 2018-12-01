@@ -17,17 +17,17 @@ namespace c0de4un
 	/* Drawable Component Type-ID */
 	static constexpr ComponentType DRAWABLE_COMPONENT = 1;
 
-	/* Physics Body Component Type-ID */
-	static constexpr ComponentType BODY_COMPONENT = 2;
-
 	/* Position Component Type-ID */
-	static constexpr ComponentType POSITION_COMPONENT = 3;
+	static constexpr ComponentType POSITION_COMPONENT = 2;
 
 	/* Rotation Component Type-ID */
-	static constexpr ComponentType ROTATION_COMPONENT = 4;
+	static constexpr ComponentType ROTATION_COMPONENT = 3;
 
 	/* Scale Component Type-ID */
-	static constexpr ComponentType SCALE_COMPONENT = 5;
+	static constexpr ComponentType SCALE_COMPONENT = 4;
+
+	/* Velocity Component Type-ID */
+	static constexpr ComponentType VELOCITY_COMPONENT = 5;
 
 }
 

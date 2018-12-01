@@ -21,6 +21,9 @@
 // Scale declared
 #define __c0de4un_scale_decl__
 
+// Enable structure-data (fields, variables) alignment (by compilator) to 1 byte
+#pragma pack( push, 1 )
+
 namespace c0de4un
 {
 
@@ -44,5 +47,8 @@ namespace c0de4un
 	};
 
 }
+
+// Restore structure-data alignment to default (8-byte on MSVC)
+#pragma pack( pop )
 
 #endif // !__c0de4un_scale_hpp__

@@ -49,7 +49,12 @@ namespace c0de4un
 		/*
 		 * Generates pseudo random unsigned int number in the given range.
 		*/
-		unsigned int getUint32( const unsigned int & pMin, const unsigned int & pMax );
+		const int getUint32( const int & pMin, const int & pMax );
+
+		/*
+		 * Generates pseudo random float number in the given range.
+		*/
+		const float getFloat( const float & pMin, const float & pMax );
 
 		// -------------------------------------------------------- \\
 
@@ -67,6 +72,9 @@ namespace c0de4un
 		 * mt19937 - 32-bit Mersenne Twister by Matsumoto and Nishimura, 1998.
 		*/
 		std::mt19937 mGenerator;
+
+		/* int-type distributor */
+		std::uniform_int_distribution<int> mUID;
 
 		// ===========================================================
 		// Deleted

@@ -54,11 +54,19 @@
 #include "utils/random/Random.hpp"
 #endif // !__c0de4un_random_hpp__
 
+// Include SpriteSystem
+#ifndef __c0de4un_sprite_system_hpp__
+#include "systems/SpriteSystem.hpp"
+#endif // !__c0de4un_sprite_system_hpp__
+
 /* Window & Viewport & Back Buffer Size */
 static const GLuint WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
 
 /* GLFW Window */
 static GLFWwindow *mGLFWWindow = nullptr;
+
+/* Random numbers generator (wrapper) */
+c0de4un::Random * randomizer;
 
 /*
  * 2D Camera
@@ -84,9 +92,14 @@ c0de4un::GLShaderProgram * shaderProgram;
 c0de4un::GLTexture2D * texture2D;
 
 /*
+ * SpriteSystem - handles (manages) sprites.
+*/
+c0de4un::SpriteSystem * spritesSystem;
+
+/*
  * Sprites
 */
-c0de4un::Sprite * sprite_;
+//c0de4un::Sprite * sprite_;
 
 /*
  * GLRenderer - used for drawing (rendering) drawable-objects,
@@ -139,6 +152,73 @@ void glfwErrorCallback( int errorCode, const char* errorDescription ) noexcept
 
 }
 
+
+/* GLFW Mouse Position CallBack */
+void glfwMousePositionCallback( GLFWwindow *const window, const double & pX, const double & pY )
+{// TODO main::glfwMousePositionCallback
+
+	// 
+
+}
+
+/*
+ * GLFW Mouse Buttons CallBack.
+ *
+ * @param pWindow - GLFW Window.
+ * @param pButton - Button-Key.
+ * @param pAction - Action ( GLFW_PRESS || GLFW_RELEASE ).
+ * @param pModes - Input Mode ( GLFW_STICKY_MOUSE_BUTTONS , GLFW_MOUSE_BUTTON_LAST ).
+*/
+void glfwMouseButtonCallback( GLFWwindow * pWindow, int pButton, int pAction, int pMods )
+{
+
+	// Cancel
+	if ( mGLFWWindow == nullptr || spritesSystem == nullptr )
+		return;
+
+	// Log
+	std::string logMsg( "main::glfwMouseButtonCallback - KEY=" );
+	logMsg += std::to_string( pButton );
+	logMsg += ", action=";
+	logMsg += std::to_string( pAction );
+	c0de4un::Log::printDebug( logMsg.c_str( ) );
+
+	// Guarded-Block
+	try
+	{
+
+		// Left
+		if ( pButton == GLFW_MOUSE_BUTTON_LEFT && pAction == GLFW_RELEASE )
+			spritesSystem->addSprite( *shaderProgram, texture2D, glRenderer );
+
+	}
+	catch ( const std::exception & exception_ )
+	{
+
+		// Log-message
+		logMsg = "main::glfwKeyInputCallback - ERROR: ";
+		logMsg += exception_.what( );
+
+		// Print to the Log
+		c0de4un::Log::printError( logMsg.c_str( ) );
+
+		// Close GLFW Window
+		glfwSetWindowShouldClose( mGLFWWindow, true );
+
+	}
+	catch ( ... )
+	{
+
+		// Print to the Log
+		c0de4un::Log::printError( "main::glfwKeyInputCallback - unknown error !" );
+
+		// Close GLFW Window
+		glfwSetWindowShouldClose( mGLFWWindow, true );
+
+	}
+
+}
+
 /* GLFW Key-Input Callback */
 void glfwKeyInputCallback( GLFWwindow* const pWindow, const int pKey, const int scanCode, const int pAction, const int pMode ) noexcept
 {
@@ -173,12 +253,18 @@ void glfwKeyInputCallback( GLFWwindow* const pWindow, const int pKey, const int 
 		// Print to the Log
 		c0de4un::Log::printError( logMsg.c_str( ) );
 
+		// Close GLFW Window
+		glfwSetWindowShouldClose( mGLFWWindow, true );
+
 	}
 	catch ( ... )
 	{
 
 		// Print to the Log
 		c0de4un::Log::printError( "main::glfwKeyInputCallback - unknown error !" );
+
+		// Close GLFW Window
+		glfwSetWindowShouldClose( mGLFWWindow, true );
 
 	}
 
@@ -197,13 +283,17 @@ void Unload( ) noexcept
 	try
 	{
 
+		// Stop SpriteSystem
+		if ( spritesSystem != nullptr )
+			spritesSystem->Stop( glRenderer );
+
 		// Unload 2D-Texture
 		if ( texture2D != nullptr )
 			texture2D->Unload( );
 
 		// Unload Sprite
-		if ( sprite_ )
-			sprite_->Hide( glRenderer );
+		//if ( sprite_ )
+			//sprite_->Hide( glRenderer );
 
 		// Unload Shader Program & Shaders
 		if ( shaderProgram )
@@ -237,7 +327,7 @@ void Unload( ) noexcept
  * @thread_safety - not thread-safe, can be called from any thread.
 */
 void Stop( ) noexcept
-{// TODO main::Stop
+{
 
 	// Print to the Log
 	c0de4un::Log::printInfo( "main::Stop" );
@@ -248,6 +338,30 @@ void Stop( ) noexcept
 
 		// Close GLFW
 		glfwSetWindowShouldClose( mGLFWWindow, true );
+
+		// Release Randomizer
+		if ( randomizer != nullptr )
+		{
+
+			// Delete Random instance
+			delete randomizer;
+
+			// Reset pointer-value
+			randomizer = nullptr;
+
+		}
+
+		// Release SpriteSystem
+		if ( spritesSystem != nullptr )
+		{
+
+			// Delete SpriteSystem
+			delete spritesSystem;
+
+			// Reset pointer-value
+			spritesSystem = nullptr;
+
+		}
 
 		// Release 2D-Camera
 		if ( glCamera2D )
@@ -372,6 +486,10 @@ void mainLoop( )
 			// Clear Surface
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
+			// Update SpriteSystem
+			if ( spritesSystem != nullptr )
+				spritesSystem->Update( 0.016 );
+
 			// Draw Sprite-Batch
 			if ( glRenderer )
 				glRenderer->Draw( glCamera2D );
@@ -422,6 +540,10 @@ const bool Load( ) noexcept
 		// Create 2D-Camera
 		if ( !glCamera2D )
 			glCamera2D = new c0de4un::GLCamera2D( 0, 0, 1280, 720, 0, 1 );
+
+		// Create Randomizer
+		if ( randomizer == nullptr )
+			randomizer = new c0de4un::Random( );
 
 		// Create Vertex Shader
 		if ( vertexShader == nullptr )
@@ -574,13 +696,18 @@ const bool Load( ) noexcept
 		}
 
 		// Create Sprite
-		if ( !sprite_ )
-			sprite_ = new c0de4un::Sprite( "rectangle", *shaderProgram, texture2D );
+		//if ( !sprite_ )
+			//sprite_ = new c0de4un::Sprite( "rectangle", *shaderProgram, texture2D );
 
-		sprite_->mScale.vec3_ = glm::vec3( 64.0f, 64.0f, 0.0f );
-		sprite_->mPosition.vec3_ = glm::vec3( 256.0f, 256.0f, 0.0f );
+		//sprite_->mScale.vec3_ = glm::vec3( 64.0f, 64.0f, 0.0f );
+		//sprite_->mPosition.vec3_ = glm::vec3( 256.0f, 256.0f, 0.0f );
+
 		// Show Sprite
-		sprite_->Show( glRenderer );
+		//sprite_->Show( glRenderer );
+
+		// Create SpriteSystem
+		if ( spritesSystem == nullptr )
+			spritesSystem = new c0de4un::SpriteSystem( randomizer, WINDOW_WIDTH, WINDOW_HEIGHT, 10 );
 
 	}
 	catch ( const std::exception & exception_ )
@@ -666,6 +793,9 @@ const bool Initialize( ) noexcept
 
 		// Set Key Input Callback
 		glfwSetKeyCallback( mGLFWWindow, glfwKeyInputCallback );
+
+		// Set Mouse Buttons Input Callback
+		glfwSetMouseButtonCallback( mGLFWWindow, glfwMouseButtonCallback );
 
 		// Ask GLEW to use Modern OpenGL API pointers and extensions
 		glewExperimental = true;

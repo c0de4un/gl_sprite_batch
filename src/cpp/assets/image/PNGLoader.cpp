@@ -124,18 +124,32 @@ namespace c0de4un
 	const bool PNGLoader::loadImage( PNGImage *const pngImage_, InputFile *const inputFile_ )
 	{
 
+		// Open Input Stream
+		if ( !inputFile_->openStream_A( pngImage_->mFile, StreamMode::READ_BYTES, 0 ) )
+		{
+
+			// Log
+			std::string errMsg( "PNGLoader::loadImage - failed to open #" );
+			errMsg += pngImage_->mFile;
+			Log::printWarning( errMsg.c_str( ) );
+
+			// Cancel
+			return( false );
+
+		}
+
 		// Open File
-		std::FILE * filePtr = std::fopen( pngImage_->mFile.c_str( ), "rb" );
+		//std::FILE * filePtr = std::fopen( pngImage_->mFile.c_str( ), "rb" );
 
 		// Cancel if file not opened
-		if ( filePtr == nullptr )
-		{
-			// Print Error
-			Log::printError( "PNGLoader::loadImage - failed to open file !" );
+		//if ( filePtr == nullptr )
+		//{
+		//	// Print Error
+		//	Log::printError( "PNGLoader::loadImage - failed to open file !" );
 
-			// Return FALSE
-			return( false );
-		}
+		//	// Return FALSE
+		//	return( false );
+		//}
 
 		// Create PNG Structure
 		png_structp pngStruct = png_create_read_struct( PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr );
@@ -152,18 +166,18 @@ namespace c0de4un
 			// Print Error
 			Log::printError( "PNGLoader::loadImage - failed to create png structure !" );
 
-			// Close File
-			if ( filePtr != nullptr )
-			{
-				// Close File
-				fclose( filePtr );
+			//// Close File
+			//if ( filePtr != nullptr )
+			//{
+			//	// Close File
+			//	fclose( filePtr );
 
-				// Delete instance
-				delete filePtr;
+			//	// Delete instance
+			//	delete filePtr;
 
-				// Reset Pointer
-				filePtr = nullptr;
-			}
+			//	// Reset Pointer
+			//	filePtr = nullptr;
+			//}
 
 			// Return FALSE
 			return( false );
@@ -182,18 +196,18 @@ namespace c0de4un
 			if ( pngStruct != nullptr )
 				png_destroy_read_struct( &pngStruct, nullptr, nullptr );
 
-			// Close File
-			if ( filePtr != nullptr )
-			{
-				// Close File
-				fclose( filePtr );
+			//// Close File
+			//if ( filePtr != nullptr )
+			//{
+			//	// Close File
+			//	fclose( filePtr );
 
-				// Delete instance
-				delete filePtr;
+			//	// Delete instance
+			//	delete filePtr;
 
-				// Reset Pointer
-				filePtr = nullptr;
-			}
+			//	// Reset Pointer
+			//	filePtr = nullptr;
+			//}
 
 			// Return FALSE
 			return( false );
@@ -209,25 +223,28 @@ namespace c0de4un
 			if ( pngStruct != nullptr )
 				png_destroy_read_struct( &pngStruct, nullptr, nullptr );
 
-			// Close File
-			if ( filePtr != nullptr )
-			{
-				// Close File
-				fclose( filePtr );
+			//// Close File
+			//if ( filePtr != nullptr )
+			//{
+			//	// Close File
+			//	fclose( filePtr );
 
-				// Delete instance
-				delete filePtr;
+			//	// Delete instance
+			//	delete filePtr;
 
-				// Reset Pointer
-				filePtr = nullptr;
-			}
+			//	// Reset Pointer
+			//	filePtr = nullptr;
+			//}
 
 			// Return FALSE
 			return( false );
 		}
 
 		// Initialize PNG IO
-		png_init_io( pngStruct, filePtr );
+		//png_init_io( pngStruct, filePtr );
+
+		// Set Read function
+		png_set_read_fn( pngStruct, (png_voidp) inputFile_, pngCallback_onRead );
 
 		// Read PNG Info
 		png_read_info( pngStruct, pngInfo );
@@ -362,18 +379,18 @@ namespace c0de4un
 			if ( pngStruct != nullptr )
 				png_destroy_read_struct( &pngStruct, nullptr, nullptr );
 
-			// Close File
-			if ( filePtr != nullptr )
-			{
-				// Close File
-				fclose( filePtr );
+			//// Close File
+			//if ( filePtr != nullptr )
+			//{
+			//	// Close File
+			//	fclose( filePtr );
 
-				// Delete instance
-				delete filePtr;
+			//	// Delete instance
+			//	delete filePtr;
 
-				// Reset Pointer
-				filePtr = nullptr;
-			}
+			//	// Reset Pointer
+			//	filePtr = nullptr;
+			//}
 
 			// Return FALSE
 			return( false );
@@ -392,18 +409,18 @@ namespace c0de4un
 			if ( pngStruct != nullptr )
 				png_destroy_read_struct( &pngStruct, nullptr, nullptr );
 
-			// Close File
-			if ( filePtr != nullptr )
-			{
-				// Close File
-				fclose( filePtr );
+			//// Close File
+			//if ( filePtr != nullptr )
+			//{
+			//	// Close File
+			//	fclose( filePtr );
 
-				// Delete instance
-				delete filePtr;
+			//	// Delete instance
+			//	delete filePtr;
 
-				// Reset Pointer
-				filePtr = nullptr;
-			}
+			//	// Reset Pointer
+			//	filePtr = nullptr;
+			//}
 
 			// Return FALSE
 			return( false );
@@ -436,18 +453,18 @@ namespace c0de4un
 			if ( pngStruct != nullptr )
 				png_destroy_read_struct( &pngStruct, nullptr, nullptr );
 
-			// Close File
-			if ( filePtr != nullptr )
-			{
-				// Close File
-				fclose( filePtr );
+			//// Close File
+			//if ( filePtr != nullptr )
+			//{
+			//	// Close File
+			//	fclose( filePtr );
 
-				// Delete instance
-				delete filePtr;
+			//	// Delete instance
+			//	delete filePtr;
 
-				// Reset Pointer
-				filePtr = nullptr;
-			}
+			//	// Reset Pointer
+			//	filePtr = nullptr;
+			//}
 
 			// Return FALSE
 			return( false );
@@ -478,10 +495,10 @@ namespace c0de4un
 		pngImage_->mBytes = imageData;
 
 		// Close File
-		fclose( filePtr );
+		//fclose( filePtr );
 
 		// Reset Pointer
-		filePtr = nullptr;
+		//filePtr = nullptr;
 
 		// Release PNG resources (structure, info etc)
 		png_destroy_read_struct( &pngStruct, &pngInfo, nullptr );

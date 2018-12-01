@@ -21,7 +21,8 @@ namespace c0de4un
 
 	/* Random constructor */
 	Random::Random( )
-		: mGenerator( std::time( 0 ) )
+		: mGenerator( std::time( nullptr ) ),
+		mUID( )
 	{
 	}
 
@@ -37,19 +38,33 @@ namespace c0de4un
 	/*
 	 * Generates pseudo random unsigned int number in the given range.
 	*/
-	unsigned int Random::getUint32( const unsigned int & pMin, const unsigned int & pMax )
+	const int Random::getUint32( const int & pMin, const int & pMax )
 	{
 
-		// Create distribution for uint32
-		std::uniform_int_distribution<unsigned int> uid( pMin, pMax );
+		// Check range
+		if ( pMin >= pMax )
+			throw std::exception( "Random::getUint32 - min >= max !" );
 
-		// Create random number
-		//int randomNumber_ = uid( gen ), x = -1;
+		// Change number distribution range (same as creating new instance)
+		mUID.param( std::uniform_int_distribution<int>::param_type( pMin, pMax ) );
 		
 		// Return result
-		return( uid( mGenerator ) );
-		//return( randomNumber_ );
+		return( mUID( mGenerator ) );
 
+	}
+
+	/*
+	 * Generates pseudo random float number in the given range.
+	*/
+	const float Random::getFloat( const float & pMin, const float & pMax )
+	{
+
+		// Check range
+		if ( pMin >= pMax )
+			throw std::exception( "Random::getUint32 - min >= max !" );
+
+		//return( pMin );
+		return( std::uniform_real_distribution<float>{ pMin, pMax }( mGenerator ) );
 	}
 
 	// -------------------------------------------------------- \\
